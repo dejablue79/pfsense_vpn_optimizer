@@ -1,63 +1,45 @@
-import os
 import re
-import requests
 from flask import Flask, request, jsonify
+from tasks import get_settings, get_servers
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def main():
-    data: dict = {}
-    loc: str = None
-    if 'loc' in request.args:
-        loc = request.args["loc"].upper()
-    if request.args["q"] == "pvpn":
-        r = requests.get("https://api.protonmail.ch/vpn/logicals")
-        resp = r.json()
-        print(loc)
-        for server in resp["LogicalServers"]:
-            if server["ExitCountry"] == loc and server["Features"] == 0 and server["Tier"] >= 1:
-                if loc == "US" and server['City'] == 'New York City':
-                    data[int(server["Load"])] = server["Domain"]
-                elif loc != "US":
-                    data[int(server["Load"])] = server["Domain"]
-    elif request.args["q"] == "nvpn":
-        if 'loc' not in request.args:
-            r = requests.get("https://api.nordvpn.com/v1/servers/recommendations")
+    if request.args["q"] in ("pvpn", "nvpn"):
+        if 'loc' in request.args:
+            data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
         else:
-            r = requests.get("https://api.nordvpn.com/server")
-        resp = r.json()
-        for server in resp:
-            if "flag" in server:
-                if server["flag"] == loc:
-                    data[int(server["load"])] = server["domain"]
-            else:
-                data[int(server["load"])] = server["hostname"]
-    return jsonify(data)
+            data = get_servers(provider=request.args["q"])
+        return jsonify(data)
+    else:
+        return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
 
 
-@app.route('/pf')
+@app.route('/get_settings')
 def pf():
     cli = []
     vpn_clients = get_settings()
-    # return vpn_clients
     for vpnclient in vpn_clients["openvpn-client"]:
-        print(vpnclient["server_addr"])
         if re.match("(DE0. ProtonVPN)", vpnclient["description"]):
             cli.append(vpnclient["server_addr"])
 
     return jsonify(cli)
 
 
-def get_settings():
-    from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
-    host = os.getenv("host-address")
-    key = os.getenv("fauxapi-key")
-    secret = os.getenv("fauxapi-secre")
-    PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
-    openvpn_settings = PfsenseFauxapi.config_get('openvpn')
-    return openvpn_settings
+@app.route('/comp')
+def comp():
+    data = get_servers(provider="pvpn", loc="DE")
+
+    cli = []
+    vpn_clients = get_settings()
+    for vpnclient in vpn_clients["openvpn-client"]:
+        if re.match("(DE0. ProtonVPN)", vpnclient["description"]):
+            cli.append(vpnclient["server_addr"])
+
+    return jsonify({"Current": cli, "by_load": data})
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
