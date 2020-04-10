@@ -14,16 +14,13 @@ def get_all_settings() -> dict:
 
 
 def get_vpn_locals() -> list:
-    reg = "(\w\w)\-.*\.protonvpn\.com|(\w\w).+?.nordvpn\.com"
+    reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
     locations = set()
     vpn_clients = get_all_settings()
     for client in vpn_clients["openvpn-client"]:
         loc = re.match(reg, client["server_addr"])
         if loc is not None:
-            if loc[1]:
-                locations.add(loc[1].upper())
-            else:
-                locations.add(loc[2].upper())
+            locations.add(loc[1].upper())
     return locations
 
 
