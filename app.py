@@ -1,44 +1,64 @@
 import re
 from flask import Flask, request, jsonify
-from tasks import get_settings, get_servers
+from tasks import get_all_settings, get_servers, get_vpn_clients
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def main():
-    if request.args["q"] in ("pvpn", "nvpn"):
-        if 'loc' in request.args:
-            data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
+    if "q" in request.args:
+        if request.args["q"] in ("pvpn", "nvpn"):
+            if 'loc' in request.args:
+                data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
+            else:
+                data = get_servers(provider=request.args["q"])
+            return jsonify(data)
         else:
-            data = get_servers(provider=request.args["q"])
-        return jsonify(data)
+            return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
     else:
         return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
 
 
 @app.route('/get_settings')
 def pf():
-    cli = []
-    vpn_clients = get_settings()
-    for vpnclient in vpn_clients["openvpn-client"]:
-        if re.match("(DE0. ProtonVPN)", vpnclient["description"]):
-            cli.append(vpnclient["server_addr"])
-
-    return jsonify(cli)
+    """Get VPN Client's Remote Server address"""
+    return jsonify(get_vpn_clients())
 
 
 @app.route('/comp')
 def comp():
-    data = get_servers(provider="pvpn", loc="DE")
+    """Show Recommended Remote Servers and Current Settings"""
+    locations: list = ["DE", "US"]
+    vpn_clients = get_vpn_clients()
 
-    cli = []
-    vpn_clients = get_settings()
-    for vpnclient in vpn_clients["openvpn-client"]:
-        if re.match("(DE0. ProtonVPN)", vpnclient["description"]):
-            cli.append(vpnclient["server_addr"])
+    if "loc" in request.args:
+        locations.clear()
+        locations.append(request.args["loc"].upper())
 
-    return jsonify({"Current": cli, "by_load": data})
+    cli: dict = {
+        "protonVPN": {},
+        "NordVPN": {}
+    }
+
+    for loc in locations:
+        pdata = get_servers(provider="pvpn", loc=loc)
+        ndata = get_servers(provider="nvpn", loc=loc)
+        cli["protonVPN"][loc] = {
+            "pfsense": [],
+            "available_servers": pdata
+            }
+        cli["NordVPN"][loc] = {
+            "pfsense": [],
+            "available_servers": ndata
+        }
+
+        for client in vpn_clients:
+            if re.match(f"{loc}\-.*\.protonvpn\.com", client, re.IGNORECASE):
+                cli["protonVPN"][loc]["pfsense"].append(client)
+            if re.match(f"{loc}.+\.nordvpn\.com", client, re.IGNORECASE):
+                cli["NordVPN"][loc]["pfsense"].append(client)
+    return jsonify(cli)
 
 
 if __name__ == '__main__':
