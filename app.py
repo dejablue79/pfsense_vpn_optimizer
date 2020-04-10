@@ -1,12 +1,13 @@
 import re
 from flask import Flask, request, jsonify
-from tasks import get_all_settings, get_servers, get_vpn_clients
+from tasks import get_servers, get_vpn_clients
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def main():
+    """Show Recommended Remote Servers"""
     if "q" in request.args:
         if request.args["q"] in ("pvpn", "nvpn"):
             if 'loc' in request.args:

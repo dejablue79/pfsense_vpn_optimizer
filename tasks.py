@@ -41,8 +41,8 @@ def get_servers(provider: str, loc: str = None) -> dict:
                     data[int(server["Load"])] = server["Domain"]
                 elif loc != "US":
                     data[int(server["Load"])] = server["Domain"]
-                    if len(data.keys()) > 5:
-                        break
+                if len(data.keys()) > 5:
+                    break
     elif provider == "nvpn":
         if loc is not None:
             r = requests.get("https://api.nordvpn.com/server")
