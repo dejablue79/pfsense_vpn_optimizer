@@ -13,9 +13,23 @@ def get_all_settings() -> dict:
     return openvpn_settings
 
 
+def get_vpn_locals() -> list:
+    reg = "(\w\w)\-.*\.protonvpn\.com|(\w\w).+?.nordvpn\.com"
+    locations = set()
+    vpn_clients = get_all_settings()
+    for client in vpn_clients["openvpn-client"]:
+        loc = re.match(reg, client["server_addr"])
+        if loc is not None:
+            if loc[1]:
+                locations.add(loc[1].upper())
+            else:
+                locations.add(loc[2].upper())
+    return locations
+
+
 def get_vpn_clients(loc: str = None) -> list:
-    clients = []
-    locations: list = ["DE", "US"]
+    clients: list = []
+    locations: list = get_vpn_locals()
     vpn_clients = get_all_settings()
     if loc:
         locations.clear()
@@ -41,8 +55,6 @@ def get_servers(provider: str, loc: str = None) -> dict:
                     data[int(server["Load"])] = server["Domain"]
                 elif loc != "US":
                     data[int(server["Load"])] = server["Domain"]
-                if len(data.keys()) > 5:
-                    break
     elif provider == "nvpn":
         if loc is not None:
             r = requests.get("https://api.nordvpn.com/server")
@@ -53,8 +65,6 @@ def get_servers(provider: str, loc: str = None) -> dict:
             if "flag" in server:
                 if server["flag"] == loc:
                     data[int(server["load"])] = server["domain"]
-                    if len(data.keys()) > 5:
-                        break
             else:
                 if server["status"] == "online":
                     data[int(server["load"])] = server["hostname"]

@@ -1,6 +1,6 @@
 import re
 from flask import Flask, request, jsonify
-from tasks import get_servers, get_vpn_clients
+from tasks import get_servers, get_vpn_clients, get_vpn_locals
 
 app = Flask(__name__)
 
@@ -30,7 +30,7 @@ def pf():
 @app.route('/comp')
 def comp():
     """Show Recommended Remote Servers and Current Settings"""
-    locations: list = ["DE", "US"]
+    locations: list = get_vpn_locals()
     vpn_clients = get_vpn_clients()
 
     if "loc" in request.args:
