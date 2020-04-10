@@ -53,18 +53,18 @@ def get_servers(provider: str, loc: str = None) -> dict:
                 elif loc != "US":
                     data[int(server["Load"])] = server["Domain"]
     elif provider == "nvpn":
+        base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations"
         if loc is not None:
-            r = requests.get("https://api.nordvpn.com/server")
+            countries = requests.get("https://api.nordvpn.com/v1/servers/countries")
+            for country in countries.json():
+                if country["code"] == loc:
+                    url = '&filters={"country_id":' + str(country["id"]) + '}'
+                    r = requests.get(base_url + url)
         else:
-            r = requests.get("https://api.nordvpn.com/v1/servers/recommendations")
+            r = requests.get(base_url)
         resp = r.json()
         for server in resp:
-            if "flag" in server:
-                if server["flag"] == loc:
-                    data[int(server["load"])] = server["domain"]
-            else:
-                if server["status"] == "online":
-                    data[int(server["load"])] = server["hostname"]
+            data[int(server["load"])] = server["hostname"]
     else:
         return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
     return data
