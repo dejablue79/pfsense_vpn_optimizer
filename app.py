@@ -1,6 +1,6 @@
 import re
 from flask import Flask, request, jsonify
-from tasks import get_servers, get_vpn_clients, get_vpn_locals
+from tasks import get_servers, get_vpn_clients, get_vpn_locals, set_servers
 
 app = Flask(__name__)
 
@@ -60,6 +60,12 @@ def comp():
             if re.match(f"{loc}.+\.nordvpn\.com", client, re.IGNORECASE):
                 cli["NordVPN"][loc]["pfsense"].append(client)
     return jsonify(cli)
+
+
+@app.route('/set')
+def set():
+    """Set Recommended Remote Servers and Current Settings"""
+    return jsonify(set_servers())
 
 
 if __name__ == '__main__':
