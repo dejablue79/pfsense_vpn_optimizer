@@ -2,23 +2,19 @@ import re
 import os
 import requests
 
+from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
+host = os.getenv("host-address")
+key = os.getenv("fauxapi-key")
+secret = os.getenv("fauxapi-secre")
+PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
+
 
 def get_all_settings() -> dict:
-    from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
-    host = os.getenv("host-address")
-    key = os.getenv("fauxapi-key")
-    secret = os.getenv("fauxapi-secre")
-    PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
     openvpn_settings = PfsenseFauxapi.config_get('openvpn')
     return openvpn_settings
 
 
 def set_pfsense(data:dict) -> dict:
-    from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
-    host = os.getenv("host-address")
-    key = os.getenv("fauxapi-key")
-    secret = os.getenv("fauxapi-secre")
-    PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
     resp = PfsenseFauxapi.config_set(data, 'openvpn')
     PfsenseFauxapi.config_reload()
     return resp
@@ -100,19 +96,20 @@ def set_servers():
         sorted_ndata = dict(sorted(ndata.items()))
 
         for vpnclient in vpn_clients["openvpn-client"]:
-            for vpnclient in vpn_clients["openvpn-client"]:
-                if re.match(f"{loc}0. ProtonVPN", vpnclient["description"]):
-                    server = next(iter(sorted_pdata))
-                    if pdata[server] != vpnclient["server_addr"]:
-                        res["protonVPN"]["old"].append(vpnclient["server_addr"])
-                        res["protonVPN"]["new"].append(pdata[server])
-                        vpnclient["server_addr"] = pdata[server]
-                if re.match(f"{loc} NordVPN", vpnclient["description"]):
-                    server = next(iter(sorted_ndata))
-                    if ndata[int(server)] != vpnclient["server_addr"]:
-                        res["NordVPN"]["old"].append(vpnclient["server_addr"])
-                        res["NordVPN"]["new"].append(ndata[server])
-                        vpnclient["server_addr"] = ndata[server]
-                        # del ndata[server]
+            if re.match(f"{loc}0. ProtonVPN", vpnclient["description"]):
+                server = next(iter(sorted_pdata))
+                del sorted_pdata[server]
+                if pdata[server] != vpnclient["server_addr"]:
+                    res["protonVPN"]["old"].append(vpnclient["server_addr"])
+                    res["protonVPN"]["new"].append(pdata[server])
+                    vpnclient["server_addr"] = pdata[server]
+            if re.match(f"{loc} NordVPN", vpnclient["description"]):
+                server = next(iter(sorted_ndata))
+                del sorted_ndata[server]
+                if ndata[int(server)] != vpnclient["server_addr"]:
+                    res["NordVPN"]["old"].append(vpnclient["server_addr"])
+                    res["NordVPN"]["new"].append(ndata[server])
+                    vpnclient["server_addr"] = ndata[server]
+                    # del ndata[server]
     res["info"] = set_pfsense(data=vpn_clients)
     return res
