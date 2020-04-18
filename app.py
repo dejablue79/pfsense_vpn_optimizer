@@ -24,7 +24,10 @@ def main():
 @app.route('/get_settings')
 def pf():
     """Get VPN Client's Remote Server address"""
-    return jsonify(get_vpn_clients())
+    if "loc" in request.args:
+        return jsonify(get_vpn_clients(loc=request.args['loc']))
+    else:
+        return jsonify(get_vpn_clients())
 
 
 @app.route('/comp')
