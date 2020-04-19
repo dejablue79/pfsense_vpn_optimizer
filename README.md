@@ -95,4 +95,46 @@ Return JSON with current VPN setting and the recommended  servers.
 ```
 `http://localhost:5000/set`
 
-Set vpn clients with recommended servers.       
+Set vpn clients with recommended servers.
+
+Return:
+
+```json
+{
+  "NordVPN": {
+    "new": [
+      "us3176.nordvpn.com", 
+      "de531.nordvpn.com"
+    ], 
+    "old": [
+      "us5104.nordvpn.com", 
+      "de751.nordvpn.com"
+    ]
+  }, 
+  "info": {
+    "action": "config_set", 
+    "callid": "5e9c461e0d2ed", 
+    "data": {
+      "do_backup": true, 
+      "do_reload": true, 
+      "previous_config_file": "/cf/conf/backup/config-1587299870.xml"
+    }, 
+    "message": "ok"
+  }, 
+  "protonVPN": {
+    "new": [
+      "us-ny-15.protonvpn.com", 
+      "us-ny-11.protonvpn.com", 
+      "de-20.protonvpn.com", 
+      "de-10.protonvpn.com"
+    ], 
+    "old": [
+      "us-ny-17.protonvpn.com", 
+      "us-ny-09.protonvpn.com", 
+      "de-19.protonvpn.com", 
+      "de-20.protonvpn.com"
+    ]
+  }
+}
+
+``` 
