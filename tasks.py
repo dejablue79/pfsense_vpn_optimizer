@@ -94,24 +94,27 @@ def set_servers():
         pdata = get_servers(provider="pvpn", loc=loc)
         ndata = get_servers(provider="nvpn", loc=loc)
 
-        sorted_pdata = dict(sorted(pdata.items()))
-        sorted_ndata = dict(sorted(ndata.items()))
+        sorted_pdata: dict = sorted(pdata.items())
+        sorted_ndata: dict = sorted(ndata.items())
 
         for vpnclient in vpn_clients["openvpn-client"]:
-            if re.match(reg, vpnclient["server_addr"]):
-                server = next(iter(sorted_pdata))
-                del sorted_pdata[server]
-                if pdata[server] != vpnclient["server_addr"]:
-                    res["protonVPN"]["old"].append(vpnclient["server_addr"])
-                    res["protonVPN"]["new"].append(pdata[server])
-                    vpnclient["server_addr"] = pdata[server]
-            if re.match(f"{loc} NordVPN", vpnclient["description"]):
-                server = next(iter(sorted_ndata))
-                del sorted_ndata[server]
-                if ndata[int(server)] != vpnclient["server_addr"]:
-                    res["NordVPN"]["old"].append(vpnclient["server_addr"])
-                    res["NordVPN"]["new"].append(ndata[server])
-                    vpnclient["server_addr"] = ndata[server]
-                    # del ndata[server]
+            settings = re.match(reg, vpnclient["server_addr"])
+            if settings:
+                data = settings.groups()
+                if loc == data[0] and data[1] == "protonvpn":
+                    server = next(iter(sorted_pdata))
+                    del sorted_pdata[0]
+                    if server[1] != vpnclient["server_addr"]:
+                        res["protonVPN"]["old"].append(vpnclient["server_addr"])
+                        res["protonVPN"]["new"].append(server[1])
+                        vpnclient["server_addr"] = server[1]
+                elif loc == data[0] and data[1] == "nordvpn":
+                    server = next(iter(sorted_ndata))
+                    del sorted_ndata[0]
+                    if server[1] != vpnclient["server_addr"]:
+                        res["NordVPN"]["old"].append(vpnclient["server_addr"])
+                        res["NordVPN"]["new"].append(server[1])
+                        vpnclient["server_addr"] = server[1]
+
     res["info"] = set_pfsense(data=vpn_clients)
     return res
