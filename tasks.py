@@ -56,7 +56,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
         r = requests.get("https://api.protonmail.ch/vpn/logicals")
         resp = r.json()
         for server in resp["LogicalServers"]:
-            if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] > 1 and server["Status"] = 1:
+            if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] > 1 and server["Status"] == 1:
                 if loc.upper() == "US" and server['City'] == 'New York City':
                     data[int(server["Load"])] = server["Domain"]
                 elif loc.upper() != "US":
