@@ -5,7 +5,7 @@ from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
 
 host = os.getenv("host-address")
 key = os.getenv("fauxapi-key")
-secret = os.getenv("fauxapi-secre")
+secret = os.getenv("fauxapi-secret")
 
 PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
 
