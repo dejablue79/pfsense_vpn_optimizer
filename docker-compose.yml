@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  fpsense_vpn_opt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - fauxapi-secre=[CHANGE]
+      - fauxapi-key=[CHANGE]
+      - host-address=[CHANGE]
+    volumes:
+      - ".:/usr/src/app/"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "5000"
