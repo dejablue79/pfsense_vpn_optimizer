@@ -1,31 +1,44 @@
 import re
 import os
 import requests
-from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi
+from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi, PfsenseFauxapiException
 
-host = os.getenv("host-address")
-key = os.getenv("fauxapi-key")
-secret = os.getenv("fauxapi-secret")
-
-PfsenseFauxapi = PfsenseFauxapi(host, key, secret)
 
 reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
 
 
+def create_api_client() -> PfsenseFauxapi:
+    host = os.getenv("host-address")
+    key = os.getenv("fauxapi-key")
+    secret = os.getenv("fauxapi-secret")
+
+    pfapi = PfsenseFauxapi(host, key, secret)
+    return pfapi
+
+
 def get_all_settings() -> dict:
-    openvpn_settings = PfsenseFauxapi.config_get('openvpn')
-    return openvpn_settings
+    try:
+        pfapi = create_api_client()
+        openvpn_settings = pfapi.config_get('openvpn')
+    except PfsenseFauxapiException as e:
+        return {"error": str(e)}
+    else:
+        return openvpn_settings
 
 
-def set_pfsense(data:dict) -> dict:
-    resp = PfsenseFauxapi.config_set(data, 'openvpn')
-    PfsenseFauxapi.config_reload()
-    return resp
+def set_pfsense(data: dict) -> dict:
+    try:
+        pfapi = create_api_client()
+        resp = pfapi.config_set(data, 'openvpn')
+    except PfsenseFauxapiException as e:
+        return {"error": str(e)}
+    else:
+        pfapi.config_reload()
+        return resp
 
 
-def get_vpn_locals() -> list:
+def get_vpn_locals(vpn_clients: dict) -> list:
     locations = set()
-    vpn_clients = get_all_settings()
     for client in vpn_clients["openvpn-client"]:
         loc = re.match(reg, client["server_addr"])
         if loc is not None:
@@ -33,20 +46,23 @@ def get_vpn_locals() -> list:
     return locations
 
 
-def get_vpn_clients(loc: str = None) -> list:
+def get_vpn_clients(loc: str = None) -> dict:
     clients: list = []
-    locations: set = get_vpn_locals()
     vpn_clients = get_all_settings()
-    if loc:
-        locations.clear()
-        locations.add(loc.lower())
-    for loc in locations:
-        for vpnclient in vpn_clients["openvpn-client"]:
-            locals = re.search(reg, vpnclient["server_addr"])
-            if locals:
-                if loc in locals.groups():
-                    clients.append(vpnclient["server_addr"])
-    return clients
+    if "error" in vpn_clients.keys():
+        return vpn_clients
+    else:
+        locations: set = get_vpn_locals(vpn_clients)
+        if loc:
+            locations.clear()
+            locations.add(loc.lower())
+        for loc in locations:
+            for vpnclient in vpn_clients["openvpn-client"]:
+                locals = re.search(reg, vpnclient["server_addr"])
+                if locals:
+                    if loc in locals.groups():
+                        clients.append(vpnclient["server_addr"])
+        return {"clients": clients, "locations": list(locations)}
 
 
 def get_servers(provider: str, loc: str = None) -> dict:
@@ -56,7 +72,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
         r = requests.get("https://api.protonmail.ch/vpn/logicals")
         resp = r.json()
         for server in resp["LogicalServers"]:
-            if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] > 1 and server["Status"] == 1:
+            if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
                 if loc.upper() == "US" and server['City'] == 'New York City':
                     data[int(server["Load"])] = server["Domain"]
                 elif loc.upper() != "US":
@@ -89,7 +105,7 @@ def set_servers():
                     }
     }
     vpn_clients = get_all_settings()
-    locations: list = get_vpn_locals()
+    locations: list = get_vpn_locals(vpn_clients)
     for loc in locations:
         pdata = get_servers(provider="pvpn", loc=loc)
         ndata = get_servers(provider="nvpn", loc=loc)

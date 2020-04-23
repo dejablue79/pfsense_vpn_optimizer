@@ -1,6 +1,8 @@
 import re
+import os
+from validators import ip_address, domain, length
 from flask import Flask, request, jsonify
-from tasks import get_servers, get_vpn_clients, get_vpn_locals, set_servers
+from tasks import get_servers, get_vpn_clients, set_servers
 
 app = Flask(__name__)
 
@@ -25,7 +27,8 @@ def main():
 def pf():
     """Get VPN Client's Remote Server address"""
     if "loc" in request.args:
-        return jsonify(get_vpn_clients(loc=request.args['loc']))
+        location = request.args['loc']
+        return jsonify(get_vpn_clients(loc=location))
     else:
         return jsonify(get_vpn_clients())
 
@@ -33,8 +36,8 @@ def pf():
 @app.route('/comp')
 def comp():
     """Show Recommended Remote Servers and Current Settings"""
-    locations: list = get_vpn_locals()
     vpn_clients = get_vpn_clients()
+    locations: list = vpn_clients["locations"]
 
     if "loc" in request.args:
         locations.clear()
@@ -57,7 +60,7 @@ def comp():
             "available_servers": ndata
         }
 
-        for client in vpn_clients:
+        for client in vpn_clients["clients"]:
             if re.match(f"{loc}\-.*\.protonvpn\.com", client, re.IGNORECASE):
                 cli["protonVPN"][loc]["pfsense"].append(client)
             if re.match(f"{loc}.+\.nordvpn\.com", client, re.IGNORECASE):
@@ -72,4 +75,27 @@ def set():
 
 
 if __name__ == '__main__':
+
+    if "host-address" in os.environ:
+        host = os.getenv("host-address")
+        if ip_address.ipv4(host) or ip_address.ipv6(host) or domain(host):
+            raise Exception("Please verify \"host-address\" was entered correctly")
+    else:
+        raise Exception("\"host-address\" was not found")
+
+    if "fauxapi-key" in os.environ:
+        print("?!")
+        key = os.getenv("fauxapi-key")
+        if length(key, min=12, max=40):
+            raise Exception("Please verify \"fauxapi-key\" was entered correctly")
+    else:
+        raise Exception("\"fauxapi-key\" was not found")
+
+    if "fauxapi-secret" in os.environ:
+        secret = os.getenv("fauxapi-secret")
+        if length(secret, min=40, max=128):
+            raise Exception("Please verify \"fauxapi-secret\" was entered correctly")
+    else:
+        raise Exception("\"fauxapi-secret\" was not found")
+
     app.run(host="0.0.0.0", debug=True)

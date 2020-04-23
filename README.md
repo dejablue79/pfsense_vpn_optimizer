@@ -8,7 +8,8 @@ q = pvpn | nvpn
 
 Return recommended servers by provider and location.
 
-```{
+```json
+{
   "12": "dk-07.protonvpn.com", 
   "34": "dk-06.protonvpn.com", 
   "39": "dk-09.protonvpn.com", 
@@ -28,7 +29,7 @@ Return recommended servers by provider and location.
 
 Return List from current VPN clients settings
 
-```
+```json
 [
   "il35.nordvpn.com", 
   "us-ny-13.protonvpn.com", 
