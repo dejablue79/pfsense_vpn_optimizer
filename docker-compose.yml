@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - fauxapi-secre=[CHANGE]
+      - fauxapi-secret=[CHANGE]
       - fauxapi-key=[CHANGE]
       - host-address=[CHANGE]
     volumes:

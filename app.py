@@ -79,21 +79,22 @@ if __name__ == '__main__':
     if "host-address" in os.environ:
         host = os.getenv("host-address")
         if ip_address.ipv4(host) or ip_address.ipv6(host) or domain(host):
+            pass
+        else:
             raise Exception("Please verify \"host-address\" was entered correctly")
     else:
         raise Exception("\"host-address\" was not found")
 
     if "fauxapi-key" in os.environ:
-        print("?!")
         key = os.getenv("fauxapi-key")
-        if length(key, min=12, max=40):
+        if not length(key, min=12, max=40):
             raise Exception("Please verify \"fauxapi-key\" was entered correctly")
     else:
         raise Exception("\"fauxapi-key\" was not found")
 
     if "fauxapi-secret" in os.environ:
         secret = os.getenv("fauxapi-secret")
-        if length(secret, min=40, max=128):
+        if not length(secret, min=40, max=128):
             raise Exception("Please verify \"fauxapi-secret\" was entered correctly")
     else:
         raise Exception("\"fauxapi-secret\" was not found")
