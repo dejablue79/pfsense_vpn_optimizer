@@ -30,15 +30,19 @@ Return recommended servers by provider and location.
 Return List from current VPN clients settings
 
 ```json
-[
-  "il35.nordvpn.com", 
-  "us-ny-13.protonvpn.com", 
-  "us5108.nordvpn.com", 
-  "us-ny-09.protonvpn.com", 
-  "de-16.protonvpn.com", 
-  "de540.nordvpn.com", 
-  "de-14.protonvpn.com"
-]
+{
+  "clients": [
+    "de640.nordvpn.com", 
+    "de-12.protonvpn.com", 
+    "de-04.protonvpn.com", 
+    "de543.nordvpn.com", 
+    "us-ny-12.protonvpn.com"
+  ], 
+  "locations": [
+    "de", 
+    "us"
+  ]
+}
 ```
 `http://localhost:5000/comp`
 
