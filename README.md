@@ -27,7 +27,7 @@ Return recommended servers by provider and location.
 
 `http://localhost:5000/get_settings`
 
-Return List from current VPN clients settings
+Return JSON from current VPN clients settings
 
 ```json
 {

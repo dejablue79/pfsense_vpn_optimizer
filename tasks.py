@@ -16,6 +16,15 @@ def create_api_client() -> PfsenseFauxapi:
     return pfapi
 
 
+def fetch_url(url: str) -> dict:
+    try:
+        r = requests.get(url)
+    except requests.HTTPError as e:
+        print(e)
+    else:
+        return r.json()
+
+
 def get_all_settings() -> dict:
     try:
         pfapi = create_api_client()
@@ -69,8 +78,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
     data: dict = {}
 
     if provider == "pvpn":
-        r = requests.get("https://api.protonmail.ch/vpn/logicals")
-        resp = r.json()
+        resp = fetch_url("https://api.protonmail.ch/vpn/logicals")
         for server in resp["LogicalServers"]:
             if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
                 if loc.upper() == "US" and server['City'] == 'New York City':
@@ -79,15 +87,16 @@ def get_servers(provider: str, loc: str = None) -> dict:
                     data[int(server["Load"])] = server["Domain"]
     elif provider == "nvpn":
         base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations"
+        resp: dict
         if loc is not None:
-            countries = requests.get("https://api.nordvpn.com/v1/servers/countries")
-            for country in countries.json():
+            countries = fetch_url("https://api.nordvpn.com/v1/servers/countries")
+            for country in countries:
                 if country["code"] == loc.upper():
                     url = '&filters={"country_id":' + str(country["id"]) + '}'
-                    r = requests.get(base_url + url)
+                    resp = fetch_url(base_url + url)
         else:
-            r = requests.get(base_url)
-        resp = r.json()
+            resp = fetch_url(base_url)
+
         for server in resp:
             data[int(server["load"])] = server["hostname"]
     else:
@@ -113,24 +122,29 @@ def set_servers():
         sorted_pdata: dict = sorted(pdata.items())
         sorted_ndata: dict = sorted(ndata.items())
 
+        print(len(ndata.items()))
+
         for vpnclient in vpn_clients["openvpn-client"]:
             settings = re.match(reg, vpnclient["server_addr"])
             if settings:
                 data = settings.groups()
-                if loc == data[0] and data[1] == "protonvpn":
+                if loc == data[0] and data[1] == "protonvpn"and len(sorted_pdata) > 0:
                     server = next(iter(sorted_pdata))
                     del sorted_pdata[0]
                     if server[1] != vpnclient["server_addr"]:
                         res["protonVPN"]["old"].append(vpnclient["server_addr"])
                         res["protonVPN"]["new"].append(server[1])
                         vpnclient["server_addr"] = server[1]
-                elif loc == data[0] and data[1] == "nordvpn":
+                elif loc == data[0] and data[1] == "nordvpn" and len(sorted_ndata) > 0:
                     server = next(iter(sorted_ndata))
                     del sorted_ndata[0]
                     if server[1] != vpnclient["server_addr"]:
                         res["NordVPN"]["old"].append(vpnclient["server_addr"])
                         res["NordVPN"]["new"].append(server[1])
                         vpnclient["server_addr"] = server[1]
+                elif not len(ndata.items()):
+                    res["NordVPN"]["old"].append(vpnclient["server_addr"])
+                    res["NordVPN"]["new"].append(f"Unable to fetch new servers for {loc}.")
 
     res["info"] = set_pfsense(data=vpn_clients)
     return res
