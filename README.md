@@ -49,54 +49,62 @@ Return JSON from current VPN clients settings
 Return JSON with current VPN setting and the recommended  servers.
 ```json
 {
-  "NordVPN": {
+  "nordvpn": {
     "de": {
       "available_servers": {
-        "14": "de775.nordvpn.com", 
-        "16": "de695.nordvpn.com"
+        "10": "de725.nordvpn.com", 
+        "11": "de740.nordvpn.com"
       }, 
       "pfsense": [
-        "de540.nordvpn.com"
+        "de690.nordvpn.com", 
+        "de703.nordvpn.com"
       ]
     }, 
     "us": {
       "available_servers": {
-        "22": "us3268.nordvpn.com", 
-        "24": "us5142.nordvpn.com"
+        "15": "us4729.nordvpn.com", 
+        "18": "us4643.nordvpn.com", 
+        "20": "us3391.nordvpn.com"
       }, 
-      "pfsense": [
-        "us5108.nordvpn.com"
-      ]
-    } 
+      "pfsense": []
+    }
   }, 
-  "protonVPN": {
+  "protonvpn": {
     "de": {
       "available_servers": {
-        "55": "de-12.protonvpn.com", 
-        "58": "de-02.protonvpn.com", 
-        "73": "de-10.protonvpn.com", 
-        ...
+        "31": "de-10.protonvpn.com", 
+        "38": "de-26.protonvpn.com", 
+        "48": "de-28.protonvpn.com", 
+        "56": "de-04.protonvpn.com", 
+        "57": "de-11.protonvpn.com", 
+        "71": "de-24.protonvpn.com", 
+        "84": "de-25.protonvpn.com", 
+        "86": "de-12.protonvpn.com", 
+        "100": "de-27.protonvpn.com"
       }, 
       "pfsense": [
-        "de-16.protonvpn.com", 
-        "de-14.protonvpn.com"
+        "de-18.protonvpn.com", 
+        "de-17.protonvpn.com"
       ]
-    },  
+    }, 
     "us": {
       "available_servers": {
-        "46": "us-ny-11.protonvpn.com", 
-        "48": "us-ny-17.protonvpn.com", 
-        "56": "us-ny-06.protonvpn.com", 
-        ...
+        "41": "us-ny-18.protonvpn.com", 
+        "52": "us-ny-07.protonvpn.com", 
+        "53": "us-ny-17.protonvpn.com", 
+        "55": "us-ny-09.protonvpn.com", 
+        "59": "us-ny-10.protonvpn.com", 
+        "65": "us-ny-20.protonvpn.com", 
+        "75": "us-ny-19.protonvpn.com", 
+        "85": "us-ny-11.protonvpn.com", 
+        "91": "us-ny-12.protonvpn.com"
       }, 
       "pfsense": [
-        "us-ny-13.protonvpn.com", 
-        "us-ny-09.protonvpn.com"
+        "us-ny-07.protonvpn.com"
       ]
     }
   }
 }
-
 ```
 `http://localhost:5000/set`
 
@@ -118,13 +126,13 @@ Return:
   }, 
   "nordvpn": {
     "new": {
-      "DE": [
+      "de": [
         "de690.nordvpn.com", 
         "de703.nordvpn.com"
       ]
     }, 
     "old": {
-      "DE": [
+      "de": [
         "de768.nordvpn.com", 
         "de690.nordvpn.com"
       ]
@@ -132,13 +140,13 @@ Return:
   }, 
   "protonvpn": {
     "new": {
-      "DE": [
+      "de": [
         "de-18.protonvpn.com", 
         "de-17.protonvpn.com"
       ]
     }, 
     "old": {
-      "DE": [
+      "de": [
         "de-17.protonvpn.com", 
         "de-18.protonvpn.com"
       ]
