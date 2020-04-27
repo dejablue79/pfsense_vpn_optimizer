@@ -2,9 +2,9 @@ Requires pfSense-pkg-FauxAPI
 
 #### Endpoints
 
-`http://localhost:5000/?q=pvpn&loc=dk`
+`http://localhost:5000/?q=protonvpn&loc=dk`
 
-q = pvpn | nvpn
+q = protonvpn | nordvpn
 
 Return recommended servers by provider and location.
 

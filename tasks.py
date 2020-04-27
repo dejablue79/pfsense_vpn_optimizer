@@ -76,7 +76,7 @@ def get_vpn_clients(loc: str = None) -> dict:
 def get_servers(provider: str, loc: str = None) -> dict:
     data: dict = {}
 
-    if provider == "pvpn":
+    if provider == "protonvpn":
         resp = fetch_url("https://api.protonmail.ch/vpn/logicals")
         for server in resp["LogicalServers"]:
             if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
@@ -84,7 +84,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
                     data[int(server["Load"])] = server["Domain"]
                 elif loc.upper() != "US":
                     data[int(server["Load"])] = server["Domain"]
-    elif provider == "nvpn":
+    elif provider == "nordvpn":
         base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations"
         resp: dict
         if loc is not None:
@@ -116,8 +116,8 @@ def set_servers():
     pf_vpn_clients = get_all_settings()
     locations: list = get_vpn_locals(pf_vpn_clients)
     for location in locations:
-        protonvpn_servers = get_servers(provider="pvpn", loc=location)
-        nordvpn_servers = get_servers(provider="nvpn", loc=location)
+        protonvpn_servers = get_servers(provider="protonvpn", loc=location)
+        nordvpn_servers = get_servers(provider="nordvpn", loc=location)
 
         sorted_protonvpn_servers: dict = sorted(protonvpn_servers.items())
         sorted_nordvpn_servers: dict = sorted(nordvpn_servers.items())
@@ -136,20 +136,20 @@ def set_servers():
                         new_server = next(iter(sorted_nordvpn_servers))
                         del sorted_nordvpn_servers[0]
                     if new_server[1] != vpn_client["server_addr"]:
-                        if location.upper() not in results[f"{pf_client_info[1]}"]["new"]:
-                            results[f"{pf_client_info[1]}"]["old"][location.upper()] = []
-                            results[f"{pf_client_info[1]}"]["new"][location.upper()] = []
+                        if location not in results[f"{pf_client_info[1]}"]["new"]:
+                            results[f"{pf_client_info[1]}"]["old"][location] = []
+                            results[f"{pf_client_info[1]}"]["new"][location] = []
 
-                        results[f"{pf_client_info[1]}"]["old"][f"{location.upper()}"].append(vpn_client["server_addr"])
-                        results[f"{pf_client_info[1]}"]["new"][f"{location.upper()}"].append(new_server[1])
+                        results[f"{pf_client_info[1]}"]["old"][f"{location}"].append(vpn_client["server_addr"])
+                        results[f"{pf_client_info[1]}"]["new"][f"{location}"].append(new_server[1])
                         vpn_client["server_addr"] = new_server[1]
 
-    cheker: int = 0
+    checker: int = 0
     for vpn_provider in results:
         if not len(results[vpn_provider]["new"]):
             results[vpn_provider] = "No Need to Update"
-            cheker += 1
+            checker += 1
 
-    if cheker != 2:
+    if checker != 2:
         results["info"] = set_pfsense(data=pf_vpn_clients)
     return results

@@ -6,21 +6,23 @@ from tasks import get_servers, get_vpn_clients, set_servers
 
 app = Flask(__name__)
 
+reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
+
 
 @app.route('/')
 def main():
     """Show Recommended Remote Servers"""
     if "q" in request.args:
-        if request.args["q"] in ("pvpn", "nvpn"):
+        if request.args["q"] in ("protonvpn", "nordvpn"):
             if 'loc' in request.args:
                 data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
             else:
                 data = get_servers(provider=request.args["q"])
             return jsonify(data)
         else:
-            return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
+            return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
     else:
-        return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
+        return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
 
 
 @app.route('/get_settings')
@@ -44,27 +46,23 @@ def comp():
         locations.append(request.args["loc"].upper())
 
     cli: dict = {
-        "protonVPN": {},
-        "NordVPN": {}
+        "protonvpn": {},
+        "nordvpn": {}
     }
 
     for loc in locations:
-        pdata = get_servers(provider="pvpn", loc=loc)
-        ndata = get_servers(provider="nvpn", loc=loc)
-        cli["protonVPN"][loc] = {
-            "pfsense": [],
-            "available_servers": pdata
-            }
-        cli["NordVPN"][loc] = {
-            "pfsense": [],
-            "available_servers": ndata
-        }
+        for provider in ["protonvpn", "nordvpn"]:
+            if loc not in cli[provider].keys():
+                cli[provider][f"{loc}"] = {"pfsense": []}
+            data = get_servers(provider=provider, loc=loc)
+            cli[provider][loc].update({ "available_servers": data})
 
-        for client in vpn_clients["clients"]:
-            if re.match(f"{loc}\-.*\.protonvpn\.com", client, re.IGNORECASE):
-                cli["protonVPN"][loc]["pfsense"].append(client)
-            if re.match(f"{loc}.+\.nordvpn\.com", client, re.IGNORECASE):
-                cli["NordVPN"][loc]["pfsense"].append(client)
+    for client in vpn_clients["clients"]:
+        vpn_address = re.match(reg, client)
+        if vpn_address:
+            vpn_address_groups = vpn_address.groups()
+            cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"].append(client)
+
     return jsonify(cli)
 
 
