@@ -3,7 +3,6 @@ import os
 import requests
 from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi, PfsenseFauxapiException
 
-
 reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
 
 
@@ -105,46 +104,52 @@ def get_servers(provider: str, loc: str = None) -> dict:
 
 
 def set_servers():
-    res: dict = {
-        "protonVPN": {"old": [],
-                      "new": []
+    results: dict = {
+        "protonvpn": {"old": {},
+                      "new": {}
                       },
-        "NordVPN": {"old": [],
-                    "new": []
+        "nordvpn": {"old": {},
+                    "new": {}
                     }
     }
-    vpn_clients = get_all_settings()
-    locations: list = get_vpn_locals(vpn_clients)
-    for loc in locations:
-        pdata = get_servers(provider="pvpn", loc=loc)
-        ndata = get_servers(provider="nvpn", loc=loc)
 
-        sorted_pdata: dict = sorted(pdata.items())
-        sorted_ndata: dict = sorted(ndata.items())
+    pf_vpn_clients = get_all_settings()
+    locations: list = get_vpn_locals(pf_vpn_clients)
+    for location in locations:
+        protonvpn_servers = get_servers(provider="pvpn", loc=location)
+        nordvpn_servers = get_servers(provider="nvpn", loc=location)
 
-        print(len(ndata.items()))
+        sorted_protonvpn_servers: dict = sorted(protonvpn_servers.items())
+        sorted_nordvpn_servers: dict = sorted(nordvpn_servers.items())
 
-        for vpnclient in vpn_clients["openvpn-client"]:
-            settings = re.match(reg, vpnclient["server_addr"])
-            if settings:
-                data = settings.groups()
-                if loc == data[0] and data[1] == "protonvpn"and len(sorted_pdata) > 0:
-                    server = next(iter(sorted_pdata))
-                    del sorted_pdata[0]
-                    if server[1] != vpnclient["server_addr"]:
-                        res["protonVPN"]["old"].append(vpnclient["server_addr"])
-                        res["protonVPN"]["new"].append(server[1])
-                        vpnclient["server_addr"] = server[1]
-                elif loc == data[0] and data[1] == "nordvpn" and len(sorted_ndata) > 0:
-                    server = next(iter(sorted_ndata))
-                    del sorted_ndata[0]
-                    if server[1] != vpnclient["server_addr"]:
-                        res["NordVPN"]["old"].append(vpnclient["server_addr"])
-                        res["NordVPN"]["new"].append(server[1])
-                        vpnclient["server_addr"] = server[1]
-                elif not len(ndata.items()):
-                    res["NordVPN"]["old"].append(vpnclient["server_addr"])
-                    res["NordVPN"]["new"].append(f"Unable to fetch new servers for {loc}.")
+        new_server: list
 
-    res["info"] = set_pfsense(data=vpn_clients)
-    return res
+        for vpn_client in pf_vpn_clients["openvpn-client"]:
+            check_settings = re.match(reg, vpn_client["server_addr"])
+            if check_settings:
+                pf_client_info = check_settings.groups()
+                if location == pf_client_info[0]:
+                    if pf_client_info[1] == "protonvpn" and len(sorted_protonvpn_servers) > 0:
+                        new_server = next(iter(sorted_protonvpn_servers))
+                        del sorted_protonvpn_servers[0]
+                    elif pf_client_info[1] == "nordvpn" and len(sorted_nordvpn_servers) > 0:
+                        new_server = next(iter(sorted_nordvpn_servers))
+                        del sorted_nordvpn_servers[0]
+                    if new_server[1] != vpn_client["server_addr"]:
+                        if location.upper() not in results[f"{pf_client_info[1]}"]["new"]:
+                            results[f"{pf_client_info[1]}"]["old"][location.upper()] = []
+                            results[f"{pf_client_info[1]}"]["new"][location.upper()] = []
+
+                        results[f"{pf_client_info[1]}"]["old"][f"{location.upper()}"].append(vpn_client["server_addr"])
+                        results[f"{pf_client_info[1]}"]["new"][f"{location.upper()}"].append(new_server[1])
+                        vpn_client["server_addr"] = new_server[1]
+
+    cheker: int = 0
+    for vpn_provider in results:
+        if not len(results[vpn_provider]["new"]):
+            results[vpn_provider] = "No Need to Update"
+            cheker += 1
+
+    if cheker != 2:
+        results["info"] = set_pfsense(data=pf_vpn_clients)
+    return results
