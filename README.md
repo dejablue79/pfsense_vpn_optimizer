@@ -106,40 +106,50 @@ Return:
 
 ```json
 {
-  "NordVPN": {
-    "new": [
-      "us3176.nordvpn.com", 
-      "de531.nordvpn.com"
-    ], 
-    "old": [
-      "us5104.nordvpn.com", 
-      "de751.nordvpn.com"
-    ]
-  }, 
   "info": {
     "action": "config_set", 
-    "callid": "5e9c461e0d2ed", 
+    "callid": "5ea6d1cfacc06", 
     "data": {
       "do_backup": true, 
       "do_reload": true, 
-      "previous_config_file": "/cf/conf/backup/config-1587299870.xml"
+      "previous_config_file": "/cf/conf/backup/config-1587990991.xml"
     }, 
     "message": "ok"
   }, 
-  "protonVPN": {
-    "new": [
-      "us-ny-15.protonvpn.com", 
-      "us-ny-11.protonvpn.com", 
-      "de-20.protonvpn.com", 
-      "de-10.protonvpn.com"
-    ], 
-    "old": [
-      "us-ny-17.protonvpn.com", 
-      "us-ny-09.protonvpn.com", 
-      "de-19.protonvpn.com", 
-      "de-20.protonvpn.com"
-    ]
+  "nordvpn": {
+    "new": {
+      "DE": [
+        "de690.nordvpn.com", 
+        "de703.nordvpn.com"
+      ]
+    }, 
+    "old": {
+      "DE": [
+        "de768.nordvpn.com", 
+        "de690.nordvpn.com"
+      ]
+    }
+  }, 
+  "protonvpn": {
+    "new": {
+      "DE": [
+        "de-18.protonvpn.com", 
+        "de-17.protonvpn.com"
+      ]
+    }, 
+    "old": {
+      "DE": [
+        "de-17.protonvpn.com", 
+        "de-18.protonvpn.com"
+      ]
+    }
   }
 }
-
 ``` 
+or
+```json
+{
+  "nordvpn": "No Need to Update", 
+  "protonvpn": "No Need to Update"
+}
+```
