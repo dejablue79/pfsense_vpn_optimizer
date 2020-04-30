@@ -5,10 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: pfsense-VPN-optimizer
     environment:
       - fauxapi-secret=[CHANGE]
       - fauxapi-key=[CHANGE]
       - host-address=[CHANGE]
+      - host-port=[CHANGE]
     volumes:
       - ".:/usr/src/app/"
     deploy:
