@@ -22,39 +22,6 @@ You must have protonvpn and/or nordvpn configured and working on your pfsense se
 ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
 NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
 
-## Installation
-
-Pull down the repository:
-
-    git clone https://github.com/dejablue79/pfsense_VPN_optimizer.git
-
-Navigate inside the folder created:
-
-    cd pfsense_VPN_optimizer/
-
-Modify the docker-compse.yml file to match your environment:
-
-```
-environment:
-      - fauxapi-secret=[CHANGE]
-      - fauxapi-key=[CHANGE]
-      - host-address=[CHANGE]
-      - host-port=[CHANGE]
-```
-
-Update the secret and key variables with your pfSense-fauxAPI key and secret that you would have generated in the steps to installing the faux-api from https://github.com/ndejong/pfsense_fauxapi
-
-Update the host-address variable with either your pfsense server's ip address or hostname as it will work with either. Update the host-port with the listening port of your pfsense server, this will depend on how you have your web configurator set up. 
-
-For example:
-80 is the default listening port for the http web configurator and 443 is the default listening port for the https web configurator. You can also specify a custom listening port when setting up the web configurator in the Advanced settings and would need to make sure that is in the docker-compse.yml file
-
-Make sure you are in the directory with the Dockerfile and run the following
-
-    docker-compose up -d
-
-This will build the image and start the container for you
-
 #### Endpoints
 
 `http://localhost:5000/?q=protonvpn&loc=dk`
