@@ -92,12 +92,12 @@ if __name__ == '__main__':
     else:
         raise Exception("\"HOST_PORT\" was not found")
 
-    if "FAUXAPI_APIKEY" in os.environ:
-        key = os.getenv("FAUXAPI_APIKEY")
+    if "FAUXAPI_KEY" in os.environ:
+        key = os.getenv("FAUXAPI_KEY")
         if not length(key, min=12, max=40):
-            raise Exception("Please verify \"FAUXAPI_APIKEY\" was entered correctly")
+            raise Exception("Please verify \"FAUXAPI_KEY\" was entered correctly")
     else:
-        raise Exception("\"FAUXAPI_APIKEY\" was not found")
+        raise Exception("\"FAUXAPI_KEY\" was not found")
 
     if "FAUXAPI_SECRET" in os.environ:
         secret = os.getenv("FAUXAPI_SECRET")
