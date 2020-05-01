@@ -10,9 +10,9 @@ def create_api_client() -> PfsenseFauxapi:
     # URL formatting that ndejong provided that allows for custom port numbers in your 
     # pfsense server's web configurator URL, for example I have it listening on a port 
     # other than 443 to prevent brute forcing
-    host = '{}:{}'.format(os.getenv("host-address"),os.getenv("host-port"))
-    key = os.getenv("fauxapi-key")
-    secret = os.getenv("fauxapi-secret")
+    host = '{}:{}'.format(os.getenv("HOST_ADDRESS"),os.getenv("HOST_PORT"))
+    key = os.getenv("FAUXAPI_KEY")
+    secret = os.getenv("FAUXAPI_SECRET")
 
     pfapi = PfsenseFauxapi(host, key, secret)
     return pfapi

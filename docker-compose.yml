@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - fauxapi-secret=PFFApRKMIQWl0HV5HbDsvQKJ
-      - fauxapi-key=JOTkJxThIEvjPfTdRxX0kDFzQtK7bOYCDpbCZfPjzsM6Y9ba5mfz6AuhTqsP
-      - host-address=192.168.1.1
-      - host-port=468
+      - FAUXAPI_APISECRET=testsecret
+      - FAUXAPI_APIKEY=testkey
+      - HOST_ADDRESS=192.168.1.1
+      - HOST_PORT=468
     volumes:
       - ".:/usr/src/app/"
     deploy:

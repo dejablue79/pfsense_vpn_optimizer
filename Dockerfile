@@ -7,9 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 EXPOSE 5000
-ENV fauxapi-secret=PFFApRKMIQWl0HV5HbDsvQKJ
-ENV fauxapi-key=JOTkJxThIEvjPfTdRxX0kDFzQtK7bOYCDpbCZfPjzsM6Y9ba5mfz6AuhTqsP
-ENV host-address=192.168.1.1
-ENV host-port=468
+ENV FAUXAPI_APISECRET=testsecret
+ENV FAUXAPI_APIKEY=testkey
+ENV HOST_ADDRESS=192.168.1.1
+ENV HOST_PORT=468
 
 CMD [ "python", "./app.py" ]
