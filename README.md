@@ -20,37 +20,43 @@ pfsense-fauxapi python library:
 You must have protonvpn and/or nordvpn configured and working on your pfsense server.
 
 ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
+
 NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
 
 #### Endpoints
 
-`http://localhost:5000/?q=protonvpn&loc=dk`
+##### Recommended servers
+Get recommended servers from ProtonVPN or NordVPN
 
-The 'q' variable can be either "protonvpn" or "nordvpn" depending on which you use on your server. 'loc' is how you set the location that you want to pull servers for from you respective provider.
+    GET /?q=:provider&loc=:location
 
-Example return recommended servers by provider (protonvpn) and location (dk).
+| Attribute     | Type   | Required | Description                                   |
+| ------------- |--------|----------|-----------------------------------------------|
+| provider      | string | yes      | protonvpn or nordvpn                          |
+| location      | string | no       | ISO_3166-1_alpha-2 - Two letters country code |
+
+
+    curl "http://localhost:5000/?q=protonvpn&loc=dk"
+
+Example of response
 
 ```json
 {
-  "12": "dk-07.protonvpn.com", 
-  "34": "dk-06.protonvpn.com", 
-  "39": "dk-09.protonvpn.com", 
-  "43": "dk-01.protonvpn.com", 
-  "44": "dk-11.protonvpn.com", 
-  "51": "dk-04.protonvpn.com", 
-  "53": "dk-12.protonvpn.com", 
-  "60": "dk-02.protonvpn.com", 
-  "67": "dk-05.protonvpn.com", 
-  "88": "dk-10.protonvpn.com", 
-  "92": "dk-03.protonvpn.com", 
-  "96": "dk-08.protonvpn.com"
+  "18": "dk-12.protonvpn.com",
+  "23": "dk-10.protonvpn.com",
+  "29": "dk-08.protonvpn.com",
+  "31": "dk-09.protonvpn.com",
+  "59": "dk-03.protonvpn.com"
 }
 ```
 
-`http://localhost:5000/get_settings`
+##### Current clients settings
+Get current VPN clients settings from pfSense
+    
+    GET /get_settings
+    curl "http://localhost:5000/get_settings"
 
-Example return JSON from current VPN clients settings
-
+Example of response
 ```json
 {
   "clients": [
@@ -66,10 +72,14 @@ Example return JSON from current VPN clients settings
   ]
 }
 ```
-`http://localhost:5000/comp`
 
-Example return JSON with current VPN setting and the recommended servers.
+##### Compare settings
+Compare current VPN clients settings from pfSense and recommended servers 
 
+    GET /comp
+    curl "http://localhost:5000/comp"
+
+Example of response
 ```json
 {
   "nordvpn": {
@@ -129,12 +139,13 @@ Example return JSON with current VPN setting and the recommended servers.
   }
 }
 ```
-`http://localhost:5000/set`
-
+##### Set settings
 Set vpn clients with recommended servers.
 
-Example return:
+    GET /set
+    http://localhost:5000/set
 
+Example of response
 ```json
 {
   "info": {
@@ -177,7 +188,7 @@ Example return:
   }
 }
 ``` 
-or
+Example of response when update is not needed
 ```json
 {
   "nordvpn": "No Need to Update", 

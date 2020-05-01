@@ -85,12 +85,10 @@ if __name__ == '__main__':
 
     if "HOST_PORT" in os.environ:
         port = os.getenv("HOST_PORT")
-        if int(port) >= 1 and int(port) <= 65535:
+        if 1 <= int(port) <= 65535:
             pass
         else:
             raise Exception("Please verify \"HOST_PORT\" was entered correctly")
-    else:
-        raise Exception("\"HOST_PORT\" was not found")
 
     if "FAUXAPI_KEY" in os.environ:
         key = os.getenv("FAUXAPI_KEY")

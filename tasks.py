@@ -7,14 +7,12 @@ reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
 
 
 def create_api_client() -> PfsenseFauxapi:
-    # URL formatting that ndejong provided that allows for custom port numbers in your 
-    # pfsense server's web configurator URL, for example I have it listening on a port 
-    # other than 443 to prevent brute forcing
-    host = '{}:{}'.format(os.getenv("HOST_ADDRESS"),os.getenv("HOST_PORT"))
+    host = os.getenv("HOST_ADDRESS")
+    port = os.getenv("HOST_PORT", 443)
     key = os.getenv("FAUXAPI_KEY")
     secret = os.getenv("FAUXAPI_SECRET")
 
-    pfapi = PfsenseFauxapi(host, key, secret)
+    pfapi = PfsenseFauxapi(f"{host}:{port}", key, secret)
     return pfapi
 
 
@@ -82,11 +80,15 @@ def get_servers(provider: str, loc: str = None) -> dict:
     if provider == "protonvpn":
         resp = fetch_url("https://api.protonmail.ch/vpn/logicals")
         for server in resp["LogicalServers"]:
-            if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
-                if loc.upper() == "US" and server['City'] == 'New York City':
-                    data[int(server["Load"])] = server["Domain"]
-                elif loc.upper() != "US":
-                    data[int(server["Load"])] = server["Domain"]
+            if loc:
+                if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
+                    if loc.upper() == "US" and server['City'] == 'New York City':
+                        data[int(server["Load"])] = server["Domain"]
+                    elif loc.upper() != "US":
+                        data[int(server["Load"])] = server["Domain"]
+            else:
+                data = resp["LogicalServers"]
+
     elif provider == "nordvpn":
         base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations"
         resp: dict
