@@ -15,7 +15,10 @@ def main():
     if "q" in request.args:
         if request.args["q"] in ("protonvpn", "nordvpn"):
             if 'loc' in request.args:
-                data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
+                if len(request.args["loc"]) == 2:
+                    data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
+                else:
+                    return {"Error": "loc should be two letters country code"}
             else:
                 data = get_servers(provider=request.args["q"])
             return jsonify(data)
