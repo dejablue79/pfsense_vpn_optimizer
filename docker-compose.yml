@@ -6,9 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - fauxapi-secret=[CHANGE]
-      - fauxapi-key=[CHANGE]
-      - host-address=[CHANGE]
+      - FAUXAPI_SECRET=[CHANGE]
+      - FAUXAPI_KEY=[CHANGE]
+      - HOST_ADDRESS=[CHANGE]
+      - HOST_PORT=[CHANGE]
     volumes:
       - ".:/usr/src/app/"
     deploy:

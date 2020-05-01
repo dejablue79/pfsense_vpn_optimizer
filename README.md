@@ -1,12 +1,34 @@
-Requires pfSense-pkg-FauxAPI
+### Pfsense_VPN_Optimizer
+A docker container which builds a local webserver with an API for easier interaction with the pfsense-fauxapi package developed by ndejong
+
+### Software Dependencies:
+
+pfSense v2.x
+
+[FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi) 
+
+Python 3.X
+
+Pip for python 3
+
+pfsense-fauxapi python library:
+
+    pip3 install pfsense-fauxapi
+
+### Configuration Prerequisite:
+
+You must have protonvpn and/or nordvpn configured and working on your pfsense server.
+
+ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
+NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
 
 #### Endpoints
 
 `http://localhost:5000/?q=protonvpn&loc=dk`
 
-q = protonvpn | nordvpn
+The 'q' variable can be either "protonvpn" or "nordvpn" depending on which you use on your server. 'loc' is how you set the location that you want to pull servers for from you respective provider.
 
-Return recommended servers by provider and location.
+Example return recommended servers by provider (protonvpn) and location (dk).
 
 ```json
 {
@@ -27,7 +49,7 @@ Return recommended servers by provider and location.
 
 `http://localhost:5000/get_settings`
 
-Return JSON from current VPN clients settings
+Example return JSON from current VPN clients settings
 
 ```json
 {
@@ -46,7 +68,8 @@ Return JSON from current VPN clients settings
 ```
 `http://localhost:5000/comp`
 
-Return JSON with current VPN setting and the recommended  servers.
+Example return JSON with current VPN setting and the recommended servers.
+
 ```json
 {
   "nordvpn": {
@@ -110,7 +133,7 @@ Return JSON with current VPN setting and the recommended  servers.
 
 Set vpn clients with recommended servers.
 
-Return:
+Example return:
 
 ```json
 {

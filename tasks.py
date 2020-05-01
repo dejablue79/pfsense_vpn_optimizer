@@ -7,9 +7,12 @@ reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
 
 
 def create_api_client() -> PfsenseFauxapi:
-    host = os.getenv("host-address")
-    key = os.getenv("fauxapi-key")
-    secret = os.getenv("fauxapi-secret")
+    # URL formatting that ndejong provided that allows for custom port numbers in your 
+    # pfsense server's web configurator URL, for example I have it listening on a port 
+    # other than 443 to prevent brute forcing
+    host = '{}:{}'.format(os.getenv("HOST_ADDRESS"),os.getenv("HOST_PORT"))
+    key = os.getenv("FAUXAPI_KEY")
+    secret = os.getenv("FAUXAPI_SECRET")
 
     pfapi = PfsenseFauxapi(host, key, secret)
     return pfapi

@@ -74,27 +74,36 @@ def set():
 
 if __name__ == '__main__':
 
-    if "host-address" in os.environ:
-        host = os.getenv("host-address")
+    if "HOST_ADDRESS" in os.environ:
+        host = os.getenv("HOST_ADDRESS")
         if ip_address.ipv4(host) or ip_address.ipv6(host) or domain(host):
             pass
         else:
-            raise Exception("Please verify \"host-address\" was entered correctly")
+            raise Exception("Please verify \"HOST_ADDRESS\" was entered correctly")
     else:
-        raise Exception("\"host-address\" was not found")
+        raise Exception("\"HOST_ADDRESS\" was not found")
 
-    if "fauxapi-key" in os.environ:
-        key = os.getenv("fauxapi-key")
+    if "HOST_PORT" in os.environ:
+        port = os.getenv("HOST_PORT")
+        if int(port) >= 1 and int(port) <= 65535:
+            pass
+        else:
+            raise Exception("Please verify \"HOST_PORT\" was entered correctly")
+    else:
+        raise Exception("\"HOST_PORT\" was not found")
+
+    if "FAUXAPI_KEY" in os.environ:
+        key = os.getenv("FAUXAPI_KEY")
         if not length(key, min=12, max=40):
-            raise Exception("Please verify \"fauxapi-key\" was entered correctly")
+            raise Exception("Please verify \"FAUXAPI_KEY\" was entered correctly")
     else:
-        raise Exception("\"fauxapi-key\" was not found")
+        raise Exception("\"FAUXAPI_KEY\" was not found")
 
-    if "fauxapi-secret" in os.environ:
-        secret = os.getenv("fauxapi-secret")
+    if "FAUXAPI_SECRET" in os.environ:
+        secret = os.getenv("FAUXAPI_SECRET")
         if not length(secret, min=40, max=128):
-            raise Exception("Please verify \"fauxapi-secret\" was entered correctly")
+            raise Exception("Please verify \"FAUXAPI_SECRET\" was entered correctly")
     else:
-        raise Exception("\"fauxapi-secret\" was not found")
+        raise Exception("\"FAUXAPI_SECRET\" was not found")
 
     app.run(host="0.0.0.0", debug=True)
