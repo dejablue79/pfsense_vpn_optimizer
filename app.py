@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     if "HOST_PORT" in os.environ:
         port = os.getenv("HOST_PORT")
-        if int(port) < 1 or int(port) > 65535:
+        if int(port) >= 1 and int(port) <= 65535:
             pass
         else:
             raise Exception("Please verify \"HOST_PORT\" was entered correctly")
