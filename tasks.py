@@ -83,14 +83,14 @@ def get_servers(provider: str, loc: str = None) -> dict:
             if loc:
                 if server["ExitCountry"] == loc.upper() and server["Features"] == 0 and server["Tier"] == 2 and server["Status"] == 1:
                     if loc.upper() == "US" and server['City'] == 'New York City':
-                        data[int(server["Load"])] = server["Domain"]
+                        data[server["Domain"]] = int(server["Load"])
                     elif loc.upper() != "US":
-                        data[int(server["Load"])] = server["Domain"]
+                        data[server["Domain"]] = int(server["Load"])
             else:
                 data = resp["LogicalServers"]
 
     elif provider == "nordvpn":
-        base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations"
+        base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&limit=10"
         resp: dict
         if loc is not None:
             countries = fetch_url("https://api.nordvpn.com/v1/servers/countries")
@@ -102,7 +102,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
             resp = fetch_url(base_url)
 
         for server in resp:
-            data[int(server["load"])] = server["hostname"]
+            data[server["hostname"]] = int(server["load"])
     else:
         return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
     return data
@@ -124,30 +124,31 @@ def set_servers():
         protonvpn_servers = get_servers(provider="protonvpn", loc=location)
         nordvpn_servers = get_servers(provider="nordvpn", loc=location)
 
-        sorted_protonvpn_servers: dict = sorted(protonvpn_servers.items())
-        sorted_nordvpn_servers: dict = sorted(nordvpn_servers.items())
+        sorted_protonvpn_servers: dict = {k: v for k, v in sorted(protonvpn_servers.items(), key=lambda item: item[1])}
+        sorted_nordvpn_servers: dict = {k: v for k, v in sorted(nordvpn_servers.items(), key=lambda item: item[1])}
 
         new_server: list
 
         for vpn_client in pf_vpn_clients["openvpn-client"]:
-            check_settings = re.match(reg, vpn_client["server_addr"])
-            if check_settings:
-                pf_client_info = check_settings.groups()
-                if location == pf_client_info[0]:
-                    if pf_client_info[1] == "protonvpn" and len(sorted_protonvpn_servers) > 0:
-                        new_server = next(iter(sorted_protonvpn_servers))
-                        del sorted_protonvpn_servers[0]
-                    elif pf_client_info[1] == "nordvpn" and len(sorted_nordvpn_servers) > 0:
-                        new_server = next(iter(sorted_nordvpn_servers))
-                        del sorted_nordvpn_servers[0]
-                    if new_server[1] != vpn_client["server_addr"]:
-                        if location not in results[f"{pf_client_info[1]}"]["new"]:
-                            results[f"{pf_client_info[1]}"]["old"][location] = []
-                            results[f"{pf_client_info[1]}"]["new"][location] = []
+            if re.findall(r"\d+", vpn_client["server_addr"]):
+                check_settings = re.match(reg, vpn_client["server_addr"])
+                if check_settings:
+                    pf_client_info = check_settings.groups()
+                    if location == pf_client_info[0]:
+                        if pf_client_info[1] == "protonvpn" and len(sorted_protonvpn_servers) > 0:
+                            new_server = next(iter(sorted_protonvpn_servers))
+                            del sorted_protonvpn_servers[new_server]
+                        elif pf_client_info[1] == "nordvpn" and len(sorted_nordvpn_servers) > 0:
+                            new_server = next(iter(sorted_nordvpn_servers))
+                            del sorted_nordvpn_servers[new_server]
+                        if new_server[0] != vpn_client["server_addr"]:
+                            if location not in results[f"{pf_client_info[1]}"]["new"]:
+                                results[f"{pf_client_info[1]}"]["old"][location] = []
+                                results[f"{pf_client_info[1]}"]["new"][location] = []
 
-                        results[f"{pf_client_info[1]}"]["old"][f"{location}"].append(vpn_client["server_addr"])
-                        results[f"{pf_client_info[1]}"]["new"][f"{location}"].append(new_server[1])
-                        vpn_client["server_addr"] = new_server[1]
+                            results[f"{pf_client_info[1]}"]["old"][f"{location}"].append(vpn_client["server_addr"])
+                            results[f"{pf_client_info[1]}"]["new"][f"{location}"].append(new_server)
+                            vpn_client["server_addr"] = new_server
 
     checker: int = 0
     for vpn_provider in results:
