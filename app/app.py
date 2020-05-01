@@ -2,7 +2,7 @@ import re
 import os
 from validators import ip_address, domain, length
 from flask import Flask, request, jsonify
-from tasks import get_servers, get_vpn_clients, set_servers
+from tasks import get_servers, get_vpn_clients, set_servers, replace_vpn_location
 
 app = Flask(__name__)
 
@@ -58,7 +58,7 @@ def comp():
             if loc not in cli[provider].keys():
                 cli[provider][f"{loc}"] = {"pfsense": []}
             data = get_servers(provider=provider, loc=loc)
-            cli[provider][loc].update({ "available_servers": data})
+            cli[provider][loc].update({"available_servers": data})
 
     for client in vpn_clients["clients"]:
         vpn_address = re.match(reg, client)
@@ -70,9 +70,24 @@ def comp():
 
 
 @app.route('/set')
-def set():
+def set_pf_clients():
     """Set Recommended Remote Servers and Current Settings"""
     return jsonify(set_servers())
+
+
+@app.route('/replace/<path:provider>')
+def replace(provider):
+    if provider in ["protonvpn", "nordvpn"]:
+        if "loc" in request.args:
+            if not len(request.args["loc"]) == 2:
+                return {"Error": "loc should be two letters country code"}
+        if "with" in request.args:
+            if not len(request.args["with"]) == 2:
+                return {"Error": "with should be two letters country code"}
+        data = replace_vpn_location(provider=provider, old=request.args["loc"], new=request.args["with"])
+        return jsonify(data)
+    else:
+        return {"Error": "Provider can be protonvpn or nordvpn"}
 
 
 if __name__ == '__main__':

@@ -10,8 +10,8 @@ services:
       - FAUXAPI_KEY=[CHANGE]
       - HOST_ADDRESS=[CHANGE]
       - HOST_PORT=[CHANGE]
-    volumes:
-      - ".:/usr/src/app/"
+#    volumes:
+#      - "app:/usr/src/app/"
     deploy:
       restart_policy:
         condition: on-failure

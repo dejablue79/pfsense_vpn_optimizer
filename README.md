@@ -139,8 +139,8 @@ Example of response
         "de-28.protonvpn.com": 60
       }, 
       "pfsense": [
-        "de.protonvpn.com", 
-        "de.protonvpn.com"
+        "de-19.protonvpn.com", 
+        "de-25.protonvpn.com"
       ]
     },  
     "us": {
