@@ -141,7 +141,7 @@ def set_servers():
                         elif pf_client_info[1] == "nordvpn" and len(sorted_nordvpn_servers) > 0:
                             new_server = next(iter(sorted_nordvpn_servers))
                             del sorted_nordvpn_servers[new_server]
-                        if new_server[0] != vpn_client["server_addr"]:
+                        if new_server != vpn_client["server_addr"]:
                             if location not in results[f"{pf_client_info[1]}"]["new"]:
                                 results[f"{pf_client_info[1]}"]["old"][location] = []
                                 results[f"{pf_client_info[1]}"]["new"][location] = []
