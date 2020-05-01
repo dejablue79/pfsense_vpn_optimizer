@@ -83,14 +83,14 @@ if __name__ == '__main__':
     else:
         raise Exception("\"HOST_ADDRESS\" was not found")
 
-    if "host-port" in os.environ:
-        port = os.getenv("host-port")
+    if "HOST_PORT" in os.environ:
+        port = os.getenv("HOST_PORT")
         if int(port) < 1 or int(port) > 65535:
             pass
         else:
-            raise Exception("Please verify \"host-port\" was entered correctly")
+            raise Exception("Please verify \"HOST_PORT\" was entered correctly")
     else:
-        raise Exception("\"host-port\" was not found")
+        raise Exception("\"HOST_PORT\" was not found")
 
     if "FAUXAPI_APIKEY" in os.environ:
         key = os.getenv("FAUXAPI_APIKEY")
