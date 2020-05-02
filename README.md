@@ -11,9 +11,8 @@ To run without Docker:
 - Python 3.X
 - Pip for python 3
 
-
+    
     pip3 install -r requirements.txt
-
 
 Or with Docker:
 
@@ -27,6 +26,7 @@ ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
 
 NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
 
+for both providers, please use the domain name rather than the IP address for `Server host or address` 
 ### Endpoints
 
 #### Recommended servers
@@ -173,7 +173,7 @@ Example of response
 Set vpn clients with recommended servers.
 
     GET /set
-    http://localhost:5000/set
+    curl "http://localhost:5000/set"
 
 Example of response
 ```json
@@ -237,3 +237,9 @@ Set recommended servers from ProtonVPN or NordVPN with different location
 | new_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
     
     curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
+    
+ 
+ DOTO
+- [ ] Change hardcoded US servers for ProtonVPN
+- [ ] Validate VPN locations for the `/replaceq` endpoint
+
