@@ -14,6 +14,7 @@ To run without Docker:
 
     pip3 install -r requirements.txt
 
+
 Or with Docker:
 
     docker-compose up --build
