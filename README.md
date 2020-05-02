@@ -7,13 +7,16 @@ pfSense v2.x
 
 [FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi) 
 
-Python 3.X
+To run without Docker:
+- Python 3.X
+- Pip for python 3
 
-Pip for python 3
 
-pfsense-fauxapi python library:
+    pip3 install -r requirements.txt
 
-    pip3 install pfsense-fauxapi
+Or with Docker:
+
+    docker-compose up --build
 
 ### Configuration Prerequisite:
 
@@ -23,9 +26,9 @@ ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
 
 NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
 
-#### Endpoints
+### Endpoints
 
-##### Recommended servers
+#### Recommended servers
 Get recommended servers from ProtonVPN or NordVPN
 
     GET /?q=:provider&loc=:location
@@ -52,7 +55,7 @@ Example of response
 }
 ```
 
-##### Current clients settings
+#### Current clients settings
 Get current VPN clients settings from pfSense
     
     GET /get_settings
@@ -75,7 +78,7 @@ Example of response
 }
 ```
 
-##### Compare settings
+#### Compare settings
 Compare current VPN clients settings from pfSense and recommended servers 
 
     GET /comp
@@ -165,7 +168,7 @@ Example of response
 }
 
 ```
-##### Set settings
+#### Set settings
 Set vpn clients with recommended servers.
 
     GET /set
@@ -221,3 +224,15 @@ Example of response when update is not needed
   "protonvpn": "No Need to Update"
 }
 ```
+#### Change location
+Set recommended servers from ProtonVPN or NordVPN with different location
+
+    GET /replace/:provider?loc=:old_location&with=:new_location
+
+| Attribute     | Type   | Required | Description                                   |
+|:------------- |:-------|:---------|:----------------------------------------------|
+| provider      | string | yes      | protonvpn or nordvpn                          |
+| old_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
+| new_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
+    
+    curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
