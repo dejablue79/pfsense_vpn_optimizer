@@ -74,6 +74,9 @@ def get_vpn_clients(loc: str = None) -> dict:
         return {"clients": clients, "locations": list(locations)}
 
 
+# def get_provider_locations(provider: str) -> list:
+#     pass
+
 def get_servers(provider: str, loc: str = None) -> dict:
     data: dict = {}
 
@@ -94,6 +97,8 @@ def get_servers(provider: str, loc: str = None) -> dict:
         base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&limit=10"
         resp: dict = {}
         if loc is not None:
+            if loc == "uk":
+                loc = "gb"
             countries = fetch_url("https://api.nordvpn.com/v1/servers/countries")
             for country in countries:
                 if country["code"] == loc.upper():

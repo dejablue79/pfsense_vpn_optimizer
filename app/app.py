@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     if "FAUXAPI_KEY" in os.environ:
         key = os.getenv("FAUXAPI_KEY")
-        if not length(key, min=12, max=40):
+        if not length(key, min=12, max=40) or not key.startswith("PFFA"):
             raise Exception("Please verify \"FAUXAPI_KEY\" was entered correctly")
     else:
         raise Exception("\"FAUXAPI_KEY\" was not found")
