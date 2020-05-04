@@ -1,6 +1,6 @@
 ### Pfsense_VPN_Optimizer
 A docker container which builds a local webserver with an API for easier interaction with the pfsense-fauxapi package developed by @github/ndejong
-
+in order to optimize NordVPN and ProtonVPN clients
 ### Software Dependencies:
 
 pfSense v2.x
