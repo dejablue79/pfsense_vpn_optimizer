@@ -239,7 +239,7 @@ Set recommended servers from ProtonVPN or NordVPN with different location
     curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
     
  
- DOTO
+ To do
 - [ ] Change hardcoded US servers for ProtonVPN
 - [ ] Validate VPN locations for the `/replaceq` endpoint
 

@@ -31,11 +31,7 @@ def main():
 @app.route('/get_settings')
 def pf():
     """Get VPN Client's Remote Server address"""
-    if "loc" in request.args:
-        location = request.args['loc']
-        return jsonify(get_vpn_clients(loc=location))
-    else:
-        return jsonify(get_vpn_clients())
+    return jsonify(get_vpn_clients())
 
 
 @app.route('/comp')
@@ -43,10 +39,6 @@ def comp():
     """Show Recommended Remote Servers and Current Settings"""
     vpn_clients = get_vpn_clients()
     locations: list = vpn_clients["locations"]
-
-    if "loc" in request.args:
-        locations.clear()
-        locations.append(request.args["loc"].upper())
 
     cli: dict = {
         "protonvpn": {},
@@ -56,7 +48,7 @@ def comp():
     for loc in locations:
         for provider in ["protonvpn", "nordvpn"]:
             if loc not in cli[provider].keys():
-                cli[provider][f"{loc}"] = {"pfsense": []}
+                cli[provider][f"{loc}"] = {"pfsense": {}}
             data = get_servers(provider=provider, loc=loc)
             cli[provider][loc].update({"available_servers": data})
 
@@ -64,8 +56,11 @@ def comp():
         vpn_address = re.match(reg, client)
         if vpn_address:
             vpn_address_groups = vpn_address.groups()
-            cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"].append(client)
-
+            if client in cli[vpn_address_groups[1]][vpn_address_groups[0]]["available_servers"].keys():
+                cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"][client] = \
+                    cli[vpn_address_groups[1]][vpn_address_groups[0]]["available_servers"][client]
+            else:
+                cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"][client] = None
     return jsonify(cli)
 
 
