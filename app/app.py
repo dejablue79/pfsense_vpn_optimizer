@@ -56,9 +56,11 @@ def comp():
         vpn_address = re.match(reg, client)
         if vpn_address:
             vpn_address_groups = vpn_address.groups()
-            if client in cli[vpn_address_groups[1]][vpn_address_groups[0]]["available_servers"].keys():
-                cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"][client] = \
-                    cli[vpn_address_groups[1]][vpn_address_groups[0]]["available_servers"][client]
+            alpha_code = vpn_address_groups[0]
+            provider = vpn_address_groups[1]
+            if client in cli[provider][alpha_code]["available_servers"].keys():
+                cli[provider][alpha_code]["pfsense"][client] = \
+                    cli[provider][alpha_code]["available_servers"][client]
             else:
                 cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"][client] = None
     return jsonify(cli)
@@ -117,4 +119,4 @@ if __name__ == '__main__':
     else:
         raise Exception("\"FAUXAPI_SECRET\" was not found")
 
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")
