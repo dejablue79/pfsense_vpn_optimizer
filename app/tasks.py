@@ -106,7 +106,7 @@ def get_servers(provider: str, loc: str = None) -> dict:
     return {k: v for k, v in sorted(data.items(), key=lambda item: item[1])}
 
 
-def set_servers():
+def set_servers(renew=None):
     results: dict = {
         "protonvpn": {"old": {},
                       "new": {}
@@ -117,7 +117,11 @@ def set_servers():
     }
 
     pf_vpn_clients = get_all_settings()
-    locations: set = get_vpn_locations(pf_vpn_clients)
+    locations = set()
+    if renew:
+        locations.add(renew)
+    else:
+        locations = get_vpn_locations(pf_vpn_clients)
     for location in locations:
         protonvpn_servers = get_servers(provider="protonvpn", loc=location)
         nordvpn_servers = get_servers(provider="nordvpn", loc=location)
@@ -168,4 +172,4 @@ def replace_vpn_location(provider: str, old: str, new: str) -> dict:
                 vpn_client["server_addr"] = new_location
 
     set_pfsense(data=pf_vpn_clients)
-    return set_servers()
+    return set_servers(renew=new)
