@@ -62,7 +62,15 @@ def comp():
                 cli[provider][alpha_code]["pfsense"][client] = \
                     cli[provider][alpha_code]["available_servers"][client]
             else:
-                cli[vpn_address_groups[1]][vpn_address_groups[0]]["pfsense"][client] = None
+                cli[provider][alpha_code]["pfsense"][client] = None
+    cli_clean = list()
+    for provider in cli.keys():
+        for location in cli[provider]:
+            if not len(cli[provider][location]["pfsense"]):
+                cli_clean.append([provider, location])
+    for location in cli_clean:
+        cli[location[0]].pop(location[1])
+
     return jsonify(cli)
 
 
@@ -119,4 +127,4 @@ if __name__ == '__main__':
     else:
         raise Exception("\"FAUXAPI_SECRET\" was not found")
 
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
