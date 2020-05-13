@@ -36,14 +36,18 @@ def get_all_settings() -> dict:
         return openvpn_settings
 
 
-def set_pfsense(data: dict) -> dict:
+def set_pfsense(data: dict, vpnid: list, refresh: bool = None) -> dict:
     try:
         pfapi = create_api_client()
         resp = pfapi.config_set(data, 'openvpn')
     except PfsenseFauxapiException as e:
         return {"error": str(e)}
     else:
-        pfapi.config_reload()
+        if refresh:
+            pfapi.config_reload()
+        if len(vpnid):
+            for vid in vpnid:
+                data = pfapi.function_call({"function": "openvpn_restart_by_vpnid", "args": ["client", f"{vid}"]})
         return resp
 
 
@@ -118,6 +122,8 @@ def set_servers(renew=None):
 
     pf_vpn_clients = get_all_settings()
     locations = set()
+    vpnid = list()
+
     if renew:
         locations.add(renew)
     else:
@@ -149,19 +155,20 @@ def set_servers(renew=None):
                                 results[f"{pf_client_info[1]}"]["old"][f"{location}"].append(vpn_client["server_addr"])
                                 results[f"{pf_client_info[1]}"]["new"][f"{location}"].append(new_server)
                                 vpn_client["server_addr"] = new_server
+                                vpnid.append(vpn_client["vpnid"])
 
     checker: int = 0
     for vpn_provider in results:
         if not len(results[vpn_provider]["new"]):
             results[vpn_provider] = "No Need to Update"
             checker += 1
-
     if checker != 2:
-        results["info"] = set_pfsense(data=pf_vpn_clients)
+        results["info"] = set_pfsense(data=pf_vpn_clients, vpnid=vpnid, refresh=True)
     return results
 
 
 def replace_vpn_location(provider: str, old: str, new: str) -> dict:
+    vpnid = list()
     pf_vpn_clients = get_all_settings()
     for vpn_client in pf_vpn_clients["openvpn-client"]:
         check_settings = re.match(reg, vpn_client["server_addr"])
@@ -170,6 +177,6 @@ def replace_vpn_location(provider: str, old: str, new: str) -> dict:
             if pf_client_info[1] == provider and pf_client_info[0] == old:
                 new_location = vpn_client["server_addr"].replace(old, new, 1)
                 vpn_client["server_addr"] = new_location
-
-    set_pfsense(data=pf_vpn_clients)
+                vpnid.append(vpn_client["vpnid"])
+    set_pfsense(data=pf_vpn_clients, vpnid=[])
     return set_servers(renew=new)

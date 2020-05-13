@@ -1,4 +1,5 @@
 flask
 requests
 validators
+python-dotenv
 pfsense-fauxapi
