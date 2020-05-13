@@ -3,21 +3,21 @@ A docker container which builds a local webserver with an API for easier interac
 in order to optimize NordVPN and ProtonVPN clients for single or multiple locations.
 ### Software Dependencies:
 
-pfSense v2.x
-
-[FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi) 
+- pfSense v2.x
+- [FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi) 
+  - In order to use [function_call](https://github.com/ndejong/pfsense_fauxapi#user-content-function_call) uncomment this line `openvpn.inc:function openvpn_restart_by_vpnid($mode, $vpnid)`
 
 To run without Docker:
 - Python 3.X
-- Pip for python 3
+- pip for python 3
 
-    
-    pip3 install -r requirements.txt
-
+```bash    
+pip3 install -r requirements.txt
+```
 Or with Docker:
-
-    docker-compose up --build
-
+```bash
+docker-compose up --build
+```
 ### Configuration Prerequisite:
 
 You must have protonvpn and/or nordvpn configured and working on your pfsense server.
@@ -39,9 +39,9 @@ Get recommended servers from ProtonVPN or NordVPN
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | location      | string | no       | ISO_3166-1_alpha-2 - Two letters country code |
 
-
-    curl "http://localhost:5000/?q=protonvpn&loc=dk"
-
+```bash
+curl "http://localhost:5000/?q=protonvpn&loc=dk"
+```
 Example of response
 
 ```json
@@ -60,8 +60,9 @@ Example of response
 Get current VPN clients settings from pfSense
     
     GET /get_settings
-    curl "http://localhost:5000/get_settings"
-
+```bash
+curl "http://localhost:5000/get_settings"
+```
 Example of response
 ```json
 {
@@ -83,8 +84,9 @@ Example of response
 Compare current VPN clients settings from pfSense and recommended servers 
 
     GET /comp
-    curl "http://localhost:5000/comp"
-
+```bash
+curl "http://localhost:5000/comp"
+```
 Example of response
 ```json
 {
@@ -173,8 +175,10 @@ Example of response
 Set vpn clients with recommended servers.
 
     GET /set
-    curl "http://localhost:5000/set"
 
+```bash
+curl "http://localhost:5000/set"
+```
 Example of response
 ```json
 {
@@ -235,11 +239,11 @@ Set recommended servers from ProtonVPN or NordVPN with different location
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | old_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
 | new_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
-    
-    curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
-    
+```bash    
+curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
+```
  
  To do
 - [ ] Change hardcoded US servers for ProtonVPN
-- [ ] Validate VPN locations for the `/replaceq` endpoint
+- [ ] Validate VPN locations for the `/replace` endpoint
 
