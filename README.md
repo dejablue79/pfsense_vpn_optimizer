@@ -4,29 +4,27 @@ in order to optimize NordVPN and ProtonVPN clients for single or multiple locati
 ### Software Dependencies:
 
 - pfSense v2.x
-- [FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi) 
-  - In order to use [function_call](https://github.com/ndejong/pfsense_fauxapi#user-content-function_call) uncomment this line `openvpn.inc:function openvpn_restart_by_vpnid($mode, $vpnid)`
+- [FauxAPI on pfsense](https://github.com/ndejong/pfsense_fauxapi)
 
 To run without Docker:
 - Python 3.X
 - pip for python 3
 
-```bash    
+```shell script
 pip3 install -r requirements.txt
 ```
 Or with Docker:
-```bash
+```shell script
 docker-compose up --build
 ```
 ### Configuration Prerequisite:
 
-You must have protonvpn and/or nordvpn configured and working on your pfsense server.
-
-ProtonVPN install guide: https://protonvpn.com/support/pfsense-vpn-setup/
-
-NordVPN install guide: https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/
-
-for both providers, please use the domain name rather than the IP address for `Server host or address` 
+- You must have protonvpn and/or nordvpn configured and working on your pfsense server.
+  - [ProtonVPN install guide](https://protonvpn.com/support/pfsense-vpn-setup/)
+  - [NordVPN install guide](https://nordvpn.com/tutorials/pfsense/pfsense-openvpn/)
+ 
+  for both providers, please use the *domain* *name* rather than the IP address for `Server host or address` 
+- In order to use [function_call](https://github.com/ndejong/pfsense_fauxapi#user-content-function_call) uncomment this line `openvpn.inc:function openvpn_restart_by_vpnid($mode, $vpnid)`
 ### Endpoints
 
 #### Recommended servers
@@ -39,7 +37,7 @@ Get recommended servers from ProtonVPN or NordVPN
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | location      | string | no       | ISO_3166-1_alpha-2 - Two letters country code |
 
-```bash
+```shell script
 curl "http://localhost:5000/?q=protonvpn&loc=dk"
 ```
 Example of response
@@ -60,7 +58,7 @@ Example of response
 Get current VPN clients settings from pfSense
     
     GET /get_settings
-```bash
+```shell script
 curl "http://localhost:5000/get_settings"
 ```
 Example of response
@@ -84,45 +82,30 @@ Example of response
 Compare current VPN clients settings from pfSense and recommended servers 
 
     GET /comp
-```bash
+```shell script
 curl "http://localhost:5000/comp"
 ```
 Example of response
 ```json
 {
   "nordvpn": {
-    "de": {
+     "de": {
       "available_servers": {
-        "de487.nordvpn.com": 17, 
-        "de496.nordvpn.com": 15, 
-        "de527.nordvpn.com": 14, 
-        "de532.nordvpn.com": 16, 
-        "de552.nordvpn.com": 18, 
-        "de597.nordvpn.com": 13, 
-        "de647.nordvpn.com": 19, 
-        "de695.nordvpn.com": 19, 
-        "de755.nordvpn.com": 17, 
-        "de778.nordvpn.com": 18
+        "de501.nordvpn.com": 11, 
+        "de520.nordvpn.com": 11, 
+        "de683.nordvpn.com": 10, 
+        "de688.nordvpn.com": 10, 
+        "de689.nordvpn.com": 12, 
+        "de700.nordvpn.com": 10, 
+        "de712.nordvpn.com": 11, 
+        "de724.nordvpn.com": 11, 
+        "de765.nordvpn.com": 7, 
+        "de793.nordvpn.com": 11
       }, 
-      "pfsense": [
-        "de763.nordvpn.com", 
-        "de559.nordvpn.com"
-      ]
-    }, 
-    "us": {
-      "available_servers": {
-        "us3039.nordvpn.com": 23, 
-        "us3100.nordvpn.com": 23, 
-        "us3397.nordvpn.com": 21, 
-        "us4081.nordvpn.com": 24, 
-        "us4320.nordvpn.com": 23, 
-        "us4594.nordvpn.com": 24, 
-        "us5132.nordvpn.com": 23, 
-        "us5150.nordvpn.com": 20, 
-        "us5169.nordvpn.com": 24, 
-        "us5187.nordvpn.com": 22
-      }, 
-      "pfsense": []
+      "pfsense": {
+        "de717.nordvpn.com": null, 
+        "de740.nordvpn.com": null
+      }
     }
   }, 
   "protonvpn": {
@@ -144,39 +127,38 @@ Example of response
         "de-27.protonvpn.com": 55, 
         "de-28.protonvpn.com": 60
       }, 
-      "pfsense": [
-        "de-19.protonvpn.com", 
-        "de-25.protonvpn.com"
-      ]
+      "pfsense": { 
+        "de-19.protonvpn.com": 100, 
+        "de-25.protonvpn.com": 69
+      }
     },  
     "us": {
       "available_servers": {
-        "us-ny-06.protonvpn.com": 52, 
-        "us-ny-07.protonvpn.com": 53, 
-        "us-ny-09.protonvpn.com": 74, 
-        "us-ny-10.protonvpn.com": 48, 
-        "us-ny-11.protonvpn.com": 97, 
-        "us-ny-12.protonvpn.com": 70, 
-        "us-ny-16.protonvpn.com": 54, 
-        "us-ny-17.protonvpn.com": 71, 
-        "us-ny-18.protonvpn.com": 66, 
-        "us-ny-19.protonvpn.com": 69, 
-        "us-ny-20.protonvpn.com": 42
+        "us-ny-06.protonvpn.com": 44, 
+        "us-ny-07.protonvpn.com": 44, 
+        "us-ny-09.protonvpn.com": 47, 
+        "us-ny-10.protonvpn.com": 54, 
+        "us-ny-11.protonvpn.com": 92, 
+        "us-ny-12.protonvpn.com": 50, 
+        "us-ny-16.protonvpn.com": 100, 
+        "us-ny-17.protonvpn.com": 44, 
+        "us-ny-18.protonvpn.com": 58, 
+        "us-ny-19.protonvpn.com": 51, 
+        "us-ny-20.protonvpn.com": 100
       }, 
-      "pfsense": [
-        "us-ny-20.protonvpn.com"
-      ]
+      "pfsense": {
+        "us-ny-10.protonvpn.com": 54
+      }
     }
   }
 }
-
 ```
 #### Set settings
 Set vpn clients with recommended servers.
 
     GET /set
 
-```bash
+```shell script
 curl "http://localhost:5000/set"
 ```
 Example of response
@@ -239,7 +221,7 @@ Set recommended servers from ProtonVPN or NordVPN with different location
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | old_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
 | new_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
-```bash    
+```shell script
 curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
 ```
  
