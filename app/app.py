@@ -6,7 +6,7 @@ from tasks import get_servers, get_vpn_clients, set_servers, replace_vpn_locatio
 
 app = Flask(__name__)
 
-reg = "(\w\w).+?(protonvpn|nordvpn)\.com"
+reg = r"(\w\w).+?(protonvpn|nordvpn)\.com"
 
 
 @app.route('/')
