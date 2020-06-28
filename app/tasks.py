@@ -107,7 +107,8 @@ def get_servers(provider: str, loc: str = None) -> dict:
             resp = fetch_url(base_url)
 
         for server in resp:
-            data[server["hostname"]] = int(server["load"])
+            if server["status"] == "online":
+                data[server["hostname"]] = int(server["load"])
     else:
         return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
     return {k: v for k, v in sorted(data.items(), key=lambda item: item[1])}
