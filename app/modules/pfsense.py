@@ -5,25 +5,14 @@ import re
 
 class PfSense:
     """
-    A class used to represent an Animal
-
+    PfSense Thingy...
     ...
-
-    Attributes
-    ----------
-    says_str : str
-        a formatted string to print out what the animal says
-    name : str
-        the name of the animal
-    sound : str
-        the sound that the animal makes
-    num_legs : int
-        the number of legs the animal has (default 4)
-
     Methods
     -------
-    says(sound=None)
-        Prints the animals name and what sound it makes
+    get_openvpn_settings(self) -> dict:
+    set_pfsense_config(self, data: dict, vpnid: list, refresh: bool = None) -> dict:
+    get_pf_openvpn_clients(self) -> dict:
+    get_pf_openvpn_locations(self, vpn_clients: dict) -> set:
     """
     def __init__(self):
         self.host = getenv("HOST_ADDRESS")
@@ -35,16 +24,6 @@ class PfSense:
         self.pfapi = PfsenseFauxapi(f"{self.host}:{self.port}", self.key, self.secret)
 
     def get_openvpn_settings(self) -> dict:
-        """
-        Parameters
-        ----------
-        name : str
-            The name of the animal
-        sound : str
-            The sound the animal makes
-        num_legs : int, optional
-            The number of legs the animal (default is 4)
-        """
         try:
             pf_openvpn_settings = self.pfapi.config_get('openvpn')
         except PfsenseFauxapiException as e:
@@ -53,6 +32,16 @@ class PfSense:
             return pf_openvpn_settings
 
     def set_pfsense_config(self, data: dict, vpnid: list, refresh: bool = None) -> dict:
+        """
+        Parameters
+        ----------
+        data : dict
+            .
+        vpnid : list
+            .
+        refresh : bool
+            .
+        """
         try:
             resp = self.pfapi.config_set(data, 'openvpn')
         except PfsenseFauxapiException as e:
@@ -78,6 +67,12 @@ class PfSense:
             return {"clients": clients, "locations": list(locations)}
 
     def get_pf_openvpn_locations(self, vpn_clients: dict) -> set:
+        """
+        Parameters
+        ----------
+        vpn_clients : dict
+            .
+        """
         locations = set()
         for client in vpn_clients["openvpn-client"]:
             loc = re.match(self.reg, client["server_addr"])

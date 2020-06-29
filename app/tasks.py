@@ -120,7 +120,7 @@ def set_servers(renew=None):
 
 def replace_vpn_location(provider: str, old: str, new: str) -> dict:
     vpnid = list()
-    pf_vpn_clients = get_all_settings()
+    pf_vpn_clients = pf_api.get_openvpn_settings()
     for vpn_client in pf_vpn_clients["openvpn-client"]:
         check_settings = re.match(reg, vpn_client["server_addr"])
         if check_settings:
@@ -129,5 +129,5 @@ def replace_vpn_location(provider: str, old: str, new: str) -> dict:
                 new_location = vpn_client["server_addr"].replace(old, new, 1)
                 vpn_client["server_addr"] = new_location
                 vpnid.append(vpn_client["vpnid"])
-    set_pfsense(data=pf_vpn_clients, vpnid=[])
+    pf_api.set_pfsense_confi(data=pf_vpn_clients, vpnid=[])
     return set_servers(renew=new)

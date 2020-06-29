@@ -3,7 +3,9 @@ import os
 from validators import ip_address, domain, length
 from flask import Flask, request, jsonify
 
-from tasks import pf_api, protonvpn_api, nordvpn_api, get_vpn_servers, set_servers, compare_servers, replace_vpn_location
+from tasks import pf_api, protonvpn_api, nordvpn_api, \
+    get_vpn_servers, set_servers, compare_servers, \
+    replace_vpn_location
 
 app = Flask(__name__)
 

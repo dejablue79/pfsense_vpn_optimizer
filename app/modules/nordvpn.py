@@ -2,6 +2,13 @@ import requests
 
 
 class NordVPN:
+    """
+    NordVPN Thingy...
+    ...
+    Methods
+    -------
+    receive_servers_list(loc: str = None) -> dict
+    """
     def __init__(self):
         self.base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&limit=10"
         self.countries_url = "https://api.nordvpn.com/v1/servers/countries"
