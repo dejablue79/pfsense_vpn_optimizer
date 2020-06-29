@@ -1,117 +1,66 @@
 import re
-import os
-import requests
+from modules import pfsense
+from modules import protonvpn
+from modules import nordvpn
 from validators import domain
-from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi, PfsenseFauxapiException
 
 reg = r"(\w\w).+?(protonvpn|nordvpn)\.com"
+providers = ["protonvpn", "nordvpn"]
+
+pf_api = pfsense.PfSense()
+protonvpn_api = protonvpn.ProtonVPN()
+nordvpn_api = nordvpn.NordVPN()
 
 
-def create_api_client() -> PfsenseFauxapi:
-    host = os.getenv("HOST_ADDRESS")
-    port = os.getenv("HOST_PORT", 443)
-    key = os.getenv("FAUXAPI_KEY")
-    secret = os.getenv("FAUXAPI_SECRET")
-
-    pfapi = PfsenseFauxapi(f"{host}:{port}", key, secret)
-    return pfapi
-
-
-def fetch_url(url: str) -> dict:
-    try:
-        r = requests.get(url)
-    except requests.HTTPError as e:
-        print(e)
-    else:
-        return r.json()
-
-
-def get_all_settings() -> dict:
-    try:
-        pfapi = create_api_client()
-        openvpn_settings = pfapi.config_get('openvpn')
-    except PfsenseFauxapiException as e:
-        return {"error": str(e)}
-    else:
-        return openvpn_settings
-
-
-def set_pfsense(data: dict, vpnid: list, refresh: bool = None) -> dict:
-    try:
-        pfapi = create_api_client()
-        resp = pfapi.config_set(data, 'openvpn')
-    except PfsenseFauxapiException as e:
-        return {"error": str(e)}
-    else:
-        if refresh:
-            pfapi.config_reload()
-        if len(vpnid):
-            for vid in vpnid:
-                data = pfapi.function_call({"function": "openvpn_restart_by_vpnid", "args": ["client", f"{vid}"]})
-        return resp
-
-
-def get_vpn_locations(vpn_clients: dict) -> set:
-    locations = set()
-    for client in vpn_clients["openvpn-client"]:
-        loc = re.match(reg, client["server_addr"])
-        if loc is not None:
-            locations.add(loc[1].lower())
-    return locations
-
-
-def get_vpn_clients() -> dict:
-    clients: list = []
-    vpn_clients = get_all_settings()
-    if "error" in vpn_clients.keys():
-        return vpn_clients
-    else:
-        locations: set = get_vpn_locations(vpn_clients)
-
-        for vpnclient in vpn_clients["openvpn-client"]:
-            clients.append(vpnclient["server_addr"])
-        return {"clients": clients, "locations": list(locations)}
-
-
-def get_servers(provider: str, loc: str = None) -> dict:
-    data: dict = {}
-
+def get_vpn_servers(provider: str, loc: str) -> dict:
     if provider == "protonvpn":
-        resp = fetch_url("https://api.protonmail.ch/vpn/logicals")
-        for server in resp["LogicalServers"]:
-            if loc:
-                if server["ExitCountry"] == loc.upper() and server["Tier"] == 2 \
-                        and server["EntryCountry"] == loc.upper() \
-                        and server["Status"] == 1:
-                    if loc.upper() == "US" and server['City'] == 'New York City':
-                        data[server["Domain"]] = int(server["Load"])
-                    if loc.upper() == "DE" and server['City'] == 'Berlin':
-                        data[server["Domain"]] = int(server["Load"])
-                    elif loc.upper() != "US":
-                        data[server["Domain"]] = int(server["Load"])
+        data = protonvpn_api.receive_servers_list(loc=loc)
+        return data
+    if provider == "nordvpn":
+        data = nordvpn_api.receive_servers_list(loc=loc)
+        return data
+
+
+def compare_servers():
+    vpn_clients = pf_api.get_pf_openvpn_clients()
+    locations: list = vpn_clients["locations"]
+
+    results: dict = {
+        "protonvpn": {},
+        "nordvpn": {}
+    }
+
+    for loc in locations:
+        for provider in ["protonvpn", "nordvpn"]:
+            if loc not in results[provider].keys():
+                results[provider][f"{loc}"] = {"pfsense": {}}
+            if provider == "protonvpn":
+                data = get_vpn_servers(provider="protonvpn", loc=loc)
+                results[provider][loc].update({"available_servers": data})
+            if provider == "nordvpn":
+                data = get_vpn_servers(provider="nordvpn", loc=loc)
+                results[provider][loc].update({"available_servers": data})
+
+    for client in vpn_clients["clients"]:
+        vpn_address = re.match(reg, client)
+        if vpn_address:
+            vpn_address_groups = vpn_address.groups()
+            alpha_code = vpn_address_groups[0]
+            provider = vpn_address_groups[1]
+            if client in results[provider][alpha_code]["available_servers"].keys():
+                results[provider][alpha_code]["pfsense"][client] = \
+                    results[provider][alpha_code]["available_servers"][client]
             else:
-                data = resp["LogicalServers"]
+                results[provider][alpha_code]["pfsense"][client] = None
+    results_clean = list()
+    for provider in results.keys():
+        for location in results[provider]:
+            if not len(results[provider][location]["pfsense"]):
+                results_clean.append([provider, location])
+    for location in results_clean:
+        results[location[0]].pop(location[1])
 
-    elif provider == "nordvpn":
-        base_url = "https://nordvpn.com/wp-admin/admin-ajax.php?action=servers_recommendations&limit=10"
-        resp: dict = {}
-        if loc is not None:
-            if loc == "uk":
-                loc = "gb"
-            countries = fetch_url("https://api.nordvpn.com/v1/servers/countries")
-            for country in countries:
-                if country["code"] == loc.upper():
-                    url = '&filters={"country_id":' + str(country["id"]) + '}'
-                    resp = fetch_url(base_url + url)
-        else:
-            resp = fetch_url(base_url)
-
-        for server in resp:
-            if server["status"] == "online":
-                data[server["hostname"]] = int(server["load"])
-    else:
-        return {"Error": "Use ?q=pvon For ProtonVPN or ?q=nvpn For NordVPN"}
-    return {k: v for k, v in sorted(data.items(), key=lambda item: item[1])}
+    return results
 
 
 def set_servers(renew=None):
@@ -120,17 +69,17 @@ def set_servers(renew=None):
         "nordvpn": {}
     }
 
-    pf_vpn_clients = get_all_settings()
+    pf_vpn_clients = pf_api.get_openvpn_settings()
     locations = set()
     vpnid = list()
 
     if renew:
         locations.add(renew)
     else:
-        locations = get_vpn_locations(pf_vpn_clients)
+        locations = pf_api.get_pf_openvpn_locations(pf_vpn_clients)
     for location in locations:
-        protonvpn_servers = get_servers(provider="protonvpn", loc=location)
-        nordvpn_servers = get_servers(provider="nordvpn", loc=location)
+        protonvpn_servers = get_vpn_servers(provider="protonvpn", loc=location)
+        nordvpn_servers = get_vpn_servers(provider="nordvpn", loc=location)
 
         new_server: list = []
 
@@ -165,7 +114,7 @@ def set_servers(renew=None):
                 results[vpn_provider] = "No Need to Update"
                 checker += 1
     if checker != 2:
-        results["info"] = set_pfsense(data=pf_vpn_clients, vpnid=vpnid, refresh=True)
+        results["info"] = pf_api.set_pfsense_config(data=pf_vpn_clients, vpnid=vpnid, refresh=True)
     return results
 
 
