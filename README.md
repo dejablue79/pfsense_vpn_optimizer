@@ -10,13 +10,15 @@ To run without Docker:
 - Python 3.X
 - pip for python 3
 
-```shell script
+```sh
 pip3 install -r requirements.txt
 ```
+
 Or with Docker:
-```shell script
+```sh
 docker-compose up --build
 ```
+
 ### Configuration Prerequisite:
 
 - You must have protonvpn and/or nordvpn configured and working on your pfsense server.
@@ -37,9 +39,10 @@ Get recommended servers from ProtonVPN or NordVPN
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | location      | string | no       | ISO_3166-1_alpha-2 - Two letters country code |
 
-```shell script
+```sh
 curl "http://localhost:5000/?q=protonvpn&loc=dk"
 ```
+
 Example of response
 
 ```json
@@ -58,9 +61,10 @@ Example of response
 Get current VPN clients settings from pfSense
     
     GET /get_settings
-```shell script
+```sh
 curl "http://localhost:5000/get_settings"
 ```
+
 Example of response
 ```json
 {
@@ -81,10 +85,11 @@ Example of response
 #### Compare settings
 Compare current VPN clients settings from pfSense and recommended servers 
 
-    GET /comp
-```shell script
-curl "http://localhost:5000/comp"
+    GET /compare
+```sh
+curl "http://localhost:5000/compare"
 ```
+
 Example of response
 ```json
 {
@@ -153,14 +158,15 @@ Example of response
   }
 }
 ```
+
 #### Set settings
 Set vpn clients with recommended servers.
 
     GET /set
-
-```shell script
+```sh
 curl "http://localhost:5000/set"
 ```
+
 Example of response
 ```json
 {
@@ -204,6 +210,7 @@ Example of response
   }
 }
 ``` 
+
 Example of response when update is not needed
 ```json
 {
@@ -211,6 +218,7 @@ Example of response when update is not needed
   "protonvpn": "No Need to Update"
 }
 ```
+
 #### Change location
 Set recommended servers from ProtonVPN or NordVPN with different location
 
@@ -221,7 +229,8 @@ Set recommended servers from ProtonVPN or NordVPN with different location
 | provider      | string | yes      | protonvpn or nordvpn                          |
 | old_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
 | new_location  | string | yes      | ISO_3166-1_alpha-2 - Two letters country code |
-```shell script
+
+```sh
 curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
 ```
  
