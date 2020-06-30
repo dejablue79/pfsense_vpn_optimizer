@@ -2,7 +2,10 @@ import re
 import os
 from validators import ip_address, domain, length
 from flask import Flask, request, jsonify
-from tasks import get_servers, get_vpn_clients, set_servers, replace_vpn_location
+
+from tasks import pf_api, protonvpn_api, nordvpn_api, \
+    get_vpn_servers, set_servers, compare_servers, \
+    replace_vpn_location
 
 app = Flask(__name__)
 
@@ -16,11 +19,11 @@ def main():
         if request.args["q"] in ("protonvpn", "nordvpn"):
             if 'loc' in request.args:
                 if len(request.args["loc"]) == 2:
-                    data = get_servers(provider=request.args["q"], loc=request.args["loc"].upper())
+                    data = get_vpn_servers(provider=request.args["q"], loc=request.args["loc"].upper())
                 else:
                     return {"Error": "loc should be two letters country code"}
             else:
-                data = get_servers(provider=request.args["q"])
+                data = get_vpn_servers(provider=request.args["q"])
             return jsonify(data)
         else:
             return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
@@ -31,47 +34,13 @@ def main():
 @app.route('/get_settings')
 def pf():
     """Get VPN Client's Remote Server address"""
-    return jsonify(get_vpn_clients())
+    return jsonify(pf_api.get_pf_openvpn_clients())
 
 
-@app.route('/comp')
+@app.route('/compare')
 def comp():
     """Show Recommended Remote Servers and Current Settings"""
-    vpn_clients = get_vpn_clients()
-    locations: list = vpn_clients["locations"]
-
-    cli: dict = {
-        "protonvpn": {},
-        "nordvpn": {}
-    }
-
-    for loc in locations:
-        for provider in ["protonvpn", "nordvpn"]:
-            if loc not in cli[provider].keys():
-                cli[provider][f"{loc}"] = {"pfsense": {}}
-            data = get_servers(provider=provider, loc=loc)
-            cli[provider][loc].update({"available_servers": data})
-
-    for client in vpn_clients["clients"]:
-        vpn_address = re.match(reg, client)
-        if vpn_address:
-            vpn_address_groups = vpn_address.groups()
-            alpha_code = vpn_address_groups[0]
-            provider = vpn_address_groups[1]
-            if client in cli[provider][alpha_code]["available_servers"].keys():
-                cli[provider][alpha_code]["pfsense"][client] = \
-                    cli[provider][alpha_code]["available_servers"][client]
-            else:
-                cli[provider][alpha_code]["pfsense"][client] = None
-    cli_clean = list()
-    for provider in cli.keys():
-        for location in cli[provider]:
-            if not len(cli[provider][location]["pfsense"]):
-                cli_clean.append([provider, location])
-    for location in cli_clean:
-        cli[location[0]].pop(location[1])
-
-    return jsonify(cli)
+    return jsonify(compare_servers())
 
 
 @app.route('/set')
@@ -106,12 +75,12 @@ if __name__ == '__main__':
     else:
         raise Exception("\"HOST_ADDRESS\" was not found")
 
-    if "HOST_PORT" in os.environ:
-        port = os.getenv("HOST_PORT")
-        if 1 <= int(port) <= 65535:
-            pass
-        else:
-            raise Exception("Please verify \"HOST_PORT\" was entered correctly")
+    # if "HOST_PORT" in os.environ:
+    #     port = os.getenv("HOST_PORT", 443)
+    #     if 1 <= int(port) <= 65535:
+    #         pass
+    #     else:
+    #         raise Exception("Please verify \"HOST_PORT\" was entered correctly")
 
     if "FAUXAPI_KEY" in os.environ:
         key = os.getenv("FAUXAPI_KEY")
