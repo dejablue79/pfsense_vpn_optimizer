@@ -17,8 +17,8 @@ class NordVPN:
 
     def receive_servers_list(self, loc: str = None) -> dict:
         data: dict = {}
-
         resp: dict = {}
+
         if loc is not None:
             if loc == "uk":
                 loc = "gb"
@@ -29,7 +29,6 @@ class NordVPN:
                     url = '&filters={"country_id":' + str(country["id"]) + '}'
                     r = requests.get(self.base_url + url)
                     resp = r.json()
-
         else:
             r = requests.get(self.base_url)
             resp = r.json()

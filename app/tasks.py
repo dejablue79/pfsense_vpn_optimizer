@@ -25,21 +25,14 @@ def compare_servers():
     vpn_clients = pf_api.get_pf_openvpn_clients()
     locations: list = vpn_clients["locations"]
 
-    results: dict = {
-        "protonvpn": {},
-        "nordvpn": {}
-    }
+    results: dict = {}
 
-    for loc in locations:
-        for provider in ["protonvpn", "nordvpn"]:
-            if loc not in results[provider].keys():
-                results[provider][f"{loc}"] = {"pfsense": {}}
-            if provider == "protonvpn":
-                data = get_vpn_servers(provider="protonvpn", loc=loc)
-                results[provider][loc].update({"available_servers": data})
-            if provider == "nordvpn":
-                data = get_vpn_servers(provider="nordvpn", loc=loc)
-                results[provider][loc].update({"available_servers": data})
+    for provider in providers:
+        results[provider] = {}
+        for loc in locations:
+            results[provider][f"{loc}"] = {"pfsense": {}}
+            data = get_vpn_servers(provider=provider, loc=loc)
+            results[provider][loc].update({"available_servers": data})
 
     for client in vpn_clients["clients"]:
         vpn_address = re.match(reg, client)
@@ -70,43 +63,47 @@ def set_servers(renew=None):
     }
 
     pf_vpn_clients = pf_api.get_openvpn_settings()
+
+    available_servers: dict = {}
+    new_server: list = []
     locations = set()
-    vpnid = list()
+    vpn_id = list()
 
     if renew:
         locations.add(renew)
     else:
         locations = pf_api.get_pf_openvpn_locations(pf_vpn_clients)
+
     for location in locations:
-        protonvpn_servers = get_vpn_servers(provider="protonvpn", loc=location)
-        nordvpn_servers = get_vpn_servers(provider="nordvpn", loc=location)
+        for provider in providers:
+            if provider not in available_servers.keys():
+                available_servers[provider] = {}
+            available_servers[provider].update({location: {}})
+            data = get_vpn_servers(provider=provider, loc=location)
+            available_servers[provider][location] = data
 
-        new_server: list = []
+    for vpn_client in pf_vpn_clients["openvpn-client"]:
+        if domain(vpn_client["server_addr"]):  # Make sure VPN client is set as a domain
+            if re.findall(r"\d+", vpn_client["server_addr"]):  # Ignore ProtonVPN country servers.
+                check_settings = re.match(reg, vpn_client["server_addr"])
+                if check_settings:
+                    pf_client_info = check_settings.groups()
+                    location = pf_client_info[0]
+                    provider = pf_client_info[1]
 
-        for vpn_client in pf_vpn_clients["openvpn-client"]:
-            if domain(vpn_client["server_addr"]):  # Make sure VPN client is set as a domain
-                if re.findall(r"\d+", vpn_client["server_addr"]):  # Ignore ProtonVPN country servers.
-                    check_settings = re.match(reg, vpn_client["server_addr"])
-                    if check_settings:
-                        pf_client_info = check_settings.groups()
-                        if location == pf_client_info[0]:
-                            if pf_client_info[1] == "protonvpn" and len(protonvpn_servers) > 0:
-                                new_server = next(iter(protonvpn_servers))
-                                del protonvpn_servers[new_server]
-                            elif pf_client_info[1] == "nordvpn" and len(nordvpn_servers) > 0:
-                                new_server = next(iter(nordvpn_servers))
-                                del nordvpn_servers[new_server]
-                            if new_server != vpn_client["server_addr"]:
-                                if location not in results[f"{pf_client_info[1]}"]:
-                                    results[f"{pf_client_info[1]}"][location] = {}
-                                    results[f"{pf_client_info[1]}"][location]["old"] = []
-                                    results[f"{pf_client_info[1]}"][location]["new"] = []
+                    new_server = next(iter(available_servers[provider][location]))
+                    del available_servers[provider][location][new_server]
 
-                                results[f"{pf_client_info[1]}"][f"{location}"]["old"].append(vpn_client["server_addr"])
-                                results[f"{pf_client_info[1]}"][f"{location}"]["new"].append(new_server)
-                                vpn_client["server_addr"] = new_server
-                                vpnid.append(vpn_client["vpnid"])
+                    if new_server != vpn_client["server_addr"]:
+                        if location not in results[provider]:
+                            results[provider][location] = {}
+                            results[provider][location]["old"] = []
+                            results[provider][location]["new"] = []
 
+                        results[provider][location]["old"].append(vpn_client["server_addr"])
+                        results[provider][location]["new"].append(new_server)
+                        vpn_client["server_addr"] = new_server
+                        vpn_id.append(vpn_client["vpnid"])
     checker: int = 0
     for vpn_provider in results:
         for location in results[vpn_provider].keys():
@@ -114,12 +111,12 @@ def set_servers(renew=None):
                 results[vpn_provider] = "No Need to Update"
                 checker += 1
     if checker != 2:
-        results["info"] = pf_api.set_pfsense_config(data=pf_vpn_clients, vpnid=vpnid, refresh=True)
+        results["info"] = pf_api.set_pfsense_config(data=pf_vpn_clients, vpnid=vpn_id, refresh=True)
     return results
 
 
 def replace_vpn_location(provider: str, old: str, new: str) -> dict:
-    vpnid = list()
+    vpn_id = list()
     pf_vpn_clients = pf_api.get_openvpn_settings()
     for vpn_client in pf_vpn_clients["openvpn-client"]:
         check_settings = re.match(reg, vpn_client["server_addr"])
@@ -128,6 +125,6 @@ def replace_vpn_location(provider: str, old: str, new: str) -> dict:
             if pf_client_info[1] == provider and pf_client_info[0] == old:
                 new_location = vpn_client["server_addr"].replace(old, new, 1)
                 vpn_client["server_addr"] = new_location
-                vpnid.append(vpn_client["vpnid"])
-    pf_api.set_pfsense_confi(data=pf_vpn_clients, vpnid=[])
+                vpn_id.append(vpn_client["vpn_id"])
+    pf_api.set_pfsense_config(data=pf_vpn_clients, vpnid=vpn_id)
     return set_servers(renew=new)
