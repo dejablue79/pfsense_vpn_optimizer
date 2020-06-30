@@ -235,6 +235,6 @@ curl "http://localhost:5000/replace/nordvpn?loc=de&with=nl"
 ```
  
  To do
-- [ ] Change hardcoded US servers for ProtonVPN
-- [ ] Validate VPN locations for the `/replace` endpoint
+[ ] Change hardcoded US servers for ProtonVPN
+[ ] Validate VPN locations for the `/replace` endpoint
 
