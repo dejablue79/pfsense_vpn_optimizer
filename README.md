@@ -81,9 +81,9 @@ Example of response
 #### Compare settings
 Compare current VPN clients settings from pfSense and recommended servers 
 
-    GET /comp
+    GET /compare
 ```shell script
-curl "http://localhost:5000/comp"
+curl "http://localhost:5000/compare"
 ```
 Example of response
 ```json
@@ -157,7 +157,6 @@ Example of response
 Set vpn clients with recommended servers.
 
     GET /set
-
 ```shell script
 curl "http://localhost:5000/set"
 ```
