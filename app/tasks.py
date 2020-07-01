@@ -80,9 +80,7 @@ def set_servers(renew=None, renew_provider=None):
                     provider = pf_client_info[1]
 
                     if renew and renew_provider:
-                        if renew == location and renew_provider == provider:
-                            pass
-                        else:
+                        if renew != location or renew_provider != provider:
                             continue
 
                     if provider not in available_servers.keys():
