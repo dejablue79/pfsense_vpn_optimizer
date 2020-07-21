@@ -9,6 +9,41 @@ from modules.helpers import is_supported_provider
 app = Flask(__name__)
 
 
+@app.before_first_request
+def check_env():
+    if "HOST_ADDRESS" not in os.environ:
+        raise Exception("\"HOST_ADDRESS\" was not found")
+
+    if "FAUXAPI_KEY" not in os.environ:
+        raise Exception("\"FAUXAPI_KEY\" was not found")
+
+    if "FAUXAPI_SECRET" not in os.environ:
+        raise Exception("\"FAUXAPI_SECRET\" was not found")
+
+    host = os.getenv("HOST_ADDRESS")
+    valid_host: bool = False
+
+    if ip_address.ipv4(host):
+        valid_host = True
+
+    if ip_address.ipv6(host):
+        valid_host = True
+
+    if domain(host):
+        valid_host = True
+
+    if not valid_host:
+        raise Exception("Please verify \"HOST_ADDRESS\" was entered correctly")
+
+    key = os.getenv("FAUXAPI_KEY")
+    if not length(key, min=12, max=40) or not key.startswith("PFFA"):
+        raise Exception("Please verify \"FAUXAPI_KEY\" was entered correctly")
+
+    secret = os.getenv("FAUXAPI_SECRET")
+    if not length(secret, min=40, max=128):
+        raise Exception("Please verify \"FAUXAPI_SECRET\" was entered correctly")
+
+
 @app.route('/')
 def main():
     """Show Recommended Remote Servers"""
@@ -67,37 +102,4 @@ def replace(provider):
 
 
 if __name__ == '__main__':
-
-    if "HOST_ADDRESS" not in os.environ:
-        raise Exception("\"HOST_ADDRESS\" was not found")
-
-    if "FAUXAPI_KEY" not in os.environ:
-        raise Exception("\"FAUXAPI_KEY\" was not found")
-
-    if "FAUXAPI_SECRET" not in os.environ:
-        raise Exception("\"FAUXAPI_SECRET\" was not found")
-
-    host = os.getenv("HOST_ADDRESS")
-    valid_host: bool = False
-
-    if ip_address.ipv4(host):
-        valid_host = True
-
-    if ip_address.ipv6(host):
-        valid_host = True
-
-    if domain(host):
-        valid_host = True
-
-    if not valid_host:
-        raise Exception("Please verify \"HOST_ADDRESS\" was entered correctly")
-
-    key = os.getenv("FAUXAPI_KEY")
-    if not length(key, min=12, max=40) or not key.startswith("PFFA"):
-        raise Exception("Please verify \"FAUXAPI_KEY\" was entered correctly")
-
-    secret = os.getenv("FAUXAPI_SECRET")
-    if not length(secret, min=40, max=128):
-        raise Exception("Please verify \"FAUXAPI_SECRET\" was entered correctly")
-
     app.run(host="0.0.0.0", debug=True)
