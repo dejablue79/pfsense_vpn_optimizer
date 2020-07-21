@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from tasks import pf_api, protonvpn_api, nordvpn_api, \
     get_vpn_servers, set_servers, compare_servers, \
     replace_vpn_location
-from modules.helpers import get_providers, is_supported_provider
+from modules.helpers import is_supported_provider
 
 app = Flask(__name__)
 
