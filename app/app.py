@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from tasks import pf_api, protonvpn_api, nordvpn_api, \
     get_vpn_servers, set_servers, compare_servers, \
     replace_vpn_location
+from modules.helpers import get_providers, is_supported_provider
 
 app = Flask(__name__)
 
@@ -14,7 +15,7 @@ def main():
     if "q" not in request.args:
         return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
 
-    if request.args["q"] not in ("protonvpn", "nordvpn"):
+    if not is_supported_provider(request.args["q"]):
         return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
 
     if 'loc' in request.args and len(request.args["loc"]) != 2:
@@ -48,7 +49,7 @@ def set_pf_clients():
 
 @app.route('/replace/<path:provider>')
 def replace(provider):
-    if provider not in ["protonvpn", "nordvpn"]:
+    if not is_supported_provider(provider):
         return {"Error": "Provider can be protonvpn or nordvpn"}
 
     if "loc" in request.args and len(request.args["loc"]) != 2:
