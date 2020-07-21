@@ -30,7 +30,7 @@ def compare_servers():
     locations: list = vpn_clients["locations"]
     results: dict = {}
 
-    for provider in get_providers:
+    for provider in get_providers():
         results[provider] = dict()
         for loc in locations:
             results[provider][loc] = {"pfsense": {}}
@@ -125,7 +125,7 @@ def set_servers(renew=None, renew_provider=None):
             results[vpn_provider] = "No Need to Update"
             checker += 1
 
-    if checker != len(get_providers):
+    if checker != len(get_providers()):
         results["info"] = pf_api.set_pfsense_config(
             data=pf_vpn_clients,
             vpnid=vpn_id, refresh=True)
