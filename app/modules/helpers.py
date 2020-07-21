@@ -3,7 +3,7 @@ from typing import Match
 
 
 def is_vpn_address(match: str) -> Match[str]:
-    reg = r"(\w\w).+?(protonvpn|nordvpn)\.com"
+    reg = rf"(\w\w).+?({str.join('|', get_providers())})\.com"
     return re.match(reg, match)
 
 
