@@ -1,6 +1,6 @@
 from PfsenseFauxapi.PfsenseFauxapi import PfsenseFauxapi, PfsenseFauxapiException
 from os import getenv
-import re
+from modules.helpers import is_vpn_address
 
 
 class PfSense:
@@ -19,8 +19,6 @@ class PfSense:
         self.port = 443
         self.key = getenv("FAUXAPI_KEY")
         self.secret = getenv("FAUXAPI_SECRET")
-        self.reg = r"(\w\w).+?(protonvpn|nordvpn)\.com"
-
         self.pfapi = PfsenseFauxapi(f"{self.host}:{self.port}", self.key, self.secret)
 
     def get_openvpn_settings(self) -> dict:
@@ -59,12 +57,12 @@ class PfSense:
         vpn_clients = self.get_openvpn_settings()
         if "error" in vpn_clients.keys():
             return vpn_clients
-        else:
-            locations: set = self.get_pf_openvpn_locations(vpn_clients)
 
-            for vpnclient in vpn_clients["openvpn-client"]:
-                clients.append(vpnclient["server_addr"])
-            return {"clients": clients, "locations": list(locations)}
+        locations: set = self.get_pf_openvpn_locations(vpn_clients)
+        for vpnclient in vpn_clients["openvpn-client"]:
+            clients.append(vpnclient["server_addr"])
+
+        return {"clients": clients, "locations": list(locations)}
 
     def get_pf_openvpn_locations(self, vpn_clients: dict) -> set:
         """
@@ -75,7 +73,7 @@ class PfSense:
         """
         locations = set()
         for client in vpn_clients["openvpn-client"]:
-            loc = re.match(self.reg, client["server_addr"])
+            loc = is_vpn_address(client["server_addr"])
             if loc is not None:
                 locations.add(loc[1].lower())
         return locations
