@@ -14,9 +14,13 @@ To run without Docker:
 pip3 install -r requirements.txt
 ```
 
-Or with Docker:
+With Docker compose:
 ```sh
 docker-compose up --build
+```
+or with Docker:
+```sh
+docker run -e "HOST_ADDRESS=<HOST_ADDRESS>" -e "FAUXAPI_KEY=<FAUXAPI_KEY>" -e "FAUXAPI_SECRET=<FAUXAPI_SECRET>" -p 5000:5000 hva3lb9jp9fnn9cd8nay/pfsense_vpn_optimizer
 ```
 
 ### Configuration Prerequisite:
