@@ -1,4 +1,4 @@
-FROM python:3-slim
+FROM balenalib/raspberry-pi-python:3-latest
 
 WORKDIR /usr/src/app
 
