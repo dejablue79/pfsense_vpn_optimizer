@@ -1,4 +1,4 @@
-FROM arm32v7/python3-slim
+FROM hassioaddons/base-armv7
 
 WORKDIR /usr/src/app
 
