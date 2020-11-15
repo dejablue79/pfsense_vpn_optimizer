@@ -1,4 +1,4 @@
-FROM hassioaddons/base-python
+FROM python/3-slim
 
 WORKDIR /usr/src/app
 
