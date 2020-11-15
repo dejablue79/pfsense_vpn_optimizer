@@ -1,4 +1,4 @@
-FROM hassioaddons/base-armv7:8.0.5
+FROM hassioaddons/base-python-armv7
 
 WORKDIR /usr/src/app
 
