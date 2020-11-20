@@ -22,3 +22,4 @@ jobs:
         uses: docker/build-push-action@v2.2.0
         with:
           push: True
+          tags: hva3lb9jp9fnn9cd8nay/pfsense_vpn_optimizer:latest
