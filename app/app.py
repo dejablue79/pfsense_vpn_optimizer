@@ -102,5 +102,5 @@ def replace(provider):
 
 
 if __name__ == '__main__':
-    debug = os.getenv("DEBUG", False
+    debug = os.getenv("DEBUG", False)
     app.run(host="0.0.0.0", debug=debug)
