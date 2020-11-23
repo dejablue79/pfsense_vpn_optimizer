@@ -27,5 +27,3 @@ jobs:
           push: True
           tags: |
             hva3lb9jp9fnn9cd8nay/pfsense_vpn_optimizer:latest
-            user/app:latest
-            user/app:1.0.0
