@@ -15,7 +15,7 @@ jobs:
         uses: dawidd6/action-docker-publish-changed@v3.0.1
         with:
           # GitHub token
-          token: ${{github.token}} # optional, default is 
+          token: ${{secrets.TOKEN}} # optional, default is 
           # DockerHub username
   #         username: # optional
   #         # DockerHub password
