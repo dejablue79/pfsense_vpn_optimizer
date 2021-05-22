@@ -9,6 +9,21 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Build and publish multi platform Docker images
+        # You may pin to the exact commit or the version.
+        # uses: dawidd6/action-docker-publish-changed@20bfe42234027c40173c87e255ed7df97ba18a81
+        uses: dawidd6/action-docker-publish-changed@v3.0.1
+        with:
+          # GitHub token
+          token: ${{github.token}} # optional, default is 
+          # DockerHub username
+  #         username: # optional
+  #         # DockerHub password
+  #         password: # optional
+  #         # Platforms for which the image will be built (comma separated)
+  #         platforms: # optional, default is linux/amd64
+  #         # Image tag
+  #         tag: # optional, default is latest
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
