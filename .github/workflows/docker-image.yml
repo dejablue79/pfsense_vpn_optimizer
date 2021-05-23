@@ -15,7 +15,7 @@ jobs:
         uses: dawidd6/action-docker-publish-changed@v3.0.1
         with:
           token: ${{secrets.TOKEN}}
-          platforms: linux/386,linux/amd64,linux/arm64
+#           platforms: linux/386,linux/amd64,linux/arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Cache Docker layers
