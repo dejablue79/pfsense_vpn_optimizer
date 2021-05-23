@@ -14,7 +14,6 @@ jobs:
       - name: Build and publish multi platform Docker images
         uses: dawidd6/action-docker-publish-changed@v3.0.1
         with:
-          tag: dejablue79/pfsense_vpn_optimizer:latest
           token: ${{secrets.TOKEN}}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
