@@ -12,11 +12,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build and publish multi platform Docker images
-        # You may pin to the exact commit or the version.
-        # uses: dawidd6/action-docker-publish-changed@20bfe42234027c40173c87e255ed7df97ba18a81
         uses: dawidd6/action-docker-publish-changed@v3.0.1
         with:
-          token: ${{secrets.TOKEN}} # optional, default is 
+          tag: dejablue79/pfsense_vpn_optimizer:latest
+          token: ${{secrets.TOKEN}}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Cache Docker layers
