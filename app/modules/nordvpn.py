@@ -1,4 +1,5 @@
 import requests
+from json import JSONDecodeError
 
 
 class NordVPN:
@@ -22,16 +23,39 @@ class NordVPN:
         if loc is not None:
             if loc == "uk":
                 loc = "gb"
-            r = requests.get(self.countries_url)
-            countries = r.json()
-            for country in countries:
-                if country["code"] == loc.upper():
-                    url = '&filters={"country_id":' + str(country["id"]) + '}'
-                    r = requests.get(self.base_url + url)
-                    resp = r.json()
+            try:
+                r = requests.get(self.countries_url)
+            except requests.exceptions.RequestException as e:
+                print(f"HTTP Code: {r.status_code}  {e}")
+            else:
+                try:
+                    countries = r.json()
+                except JSONDecodeError:
+                    print(f"Invalid response: {r.text}")
+                else:
+                    for country in countries:
+                        if country["code"] == loc.upper():
+                            url = '&filters={"country_id":' + str(country["id"]) + '}'
+                            try:
+                                r = requests.get(self.base_url + url)
+                            except requests.exceptions.RequestException as e:
+                                print(f"HTTP Code: {r.status_code}  {e}")
+                            else:
+                                try:
+                                    resp = r.json()
+                                except JSONDecodeError:
+                                    print(f"Invalid response: {r.text}")
+
         else:
-            r = requests.get(self.base_url)
-            resp = r.json()
+            try:
+                r = requests.get(self.base_url)
+            except requests.exceptions.RequestException as e:
+                print(f"HTTP Code: {r.status_code}  {e}")
+            else:
+                try:
+                    resp = r.json()
+                except JSONDecodeError:
+                    print(f"Invalid response: {r.text}")
 
         for server in resp:
             if server["status"] == "online":

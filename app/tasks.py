@@ -17,12 +17,11 @@ def get_vpn_servers(provider: str, loc: str) -> dict:
     if provider == "protonvpn":
         data = protonvpn_api.receive_servers_list(loc=loc)
         return data
-
-    if provider == "nordvpn":
+    elif provider == "nordvpn":
         data = nordvpn_api.receive_servers_list(loc=loc)
         return data
-
-    raise Exception(f"Provider {provider} is not supported.")
+    else:
+        raise Exception(f"Provider {provider} is not supported.")
 
 
 def compare_servers():
@@ -32,10 +31,10 @@ def compare_servers():
 
     for provider in get_providers():
         results[provider] = dict()
-        for loc in locations:
-            results[provider][loc] = {"pfsense": {}}
-            data = get_vpn_servers(provider=provider, loc=loc)
-            results[provider][loc].update({"available_servers": data})
+        for location in locations:
+            results[provider][location] = {"pfsense": {}}
+            data = get_vpn_servers(provider=provider, loc=location)
+            results[provider][location].update({"available_servers": data})
 
     for client in vpn_clients["clients"]:
         vpn_address = is_vpn_address(client)

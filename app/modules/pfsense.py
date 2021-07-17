@@ -19,7 +19,12 @@ class PfSense:
         self.port = 443
         self.key = getenv("FAUXAPI_KEY")
         self.secret = getenv("FAUXAPI_SECRET")
-        self.pfapi = PfsenseFauxapi(f"{self.host}:{self.port}", self.key, self.secret)
+        try:
+            PfsenseFauxapi(f"{self.host}:{self.port}", self.key, self.secret)
+        except PfsenseFauxapiException as e:
+            print(f"error: {str(e)}")
+        else:
+            self.pfapi = PfsenseFauxapi(f"{self.host}:{self.port}", self.key, self.secret)
 
     def get_openvpn_settings(self) -> dict:
         try:

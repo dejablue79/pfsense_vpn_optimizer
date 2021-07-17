@@ -49,14 +49,11 @@ def main():
     """Show Recommended Remote Servers"""
     if "q" not in request.args:
         return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
-
-    if not is_supported_provider(request.args["q"]):
+    elif not is_supported_provider(request.args["q"]):
         return {"Error": "Use ?q=protonvpn For ProtonVPN or ?q=nordvpn For NordVPN"}
-
-    if 'loc' in request.args and len(request.args["loc"]) != 2:
+    elif 'loc' in request.args and len(request.args["loc"]) != 2:
         return {"Error": "loc should be two letters country code"}
-
-    if 'loc' not in request.args:
+    elif 'loc' not in request.args:
         data = get_vpn_servers(provider=request.args["q"])
     else:
         data = get_vpn_servers(provider=request.args["q"], loc=request.args["loc"].upper())
